@@ -1,0 +1,30 @@
+h1 {
+    font-size: 30px;
+}
+
+
+h2 {
+    font-size: 20px;
+}
+
+div {
+    font-size: 15px;
+    padding: 3px;
+}
+
+body {
+    color: #000000;
+    background-color: #f1f1ed;
+    margin: 0px;
+    overflow: auto;
+}
+
+table.main {
+    width: 800px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    background-color: #ffffff;
+    padding: 15px;
+    background-repeat: repeat-x;
+    height: 100%;
+}

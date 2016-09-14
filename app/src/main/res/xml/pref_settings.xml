@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+	<PreferenceCategory android:title="@string/pref_header_general" >
+		<EditTextPreference
+			android:dialogTitle="@string/title_set_password"
+			android:inputType="textPassword"
+			android:key="pref_password"
+			android:title="@string/pref_title_password" />
+
+		<CheckBoxPreference
+			android:key="pref_fullscreen"
+			android:title="@string/pref_title_fullscreen" />
+	</PreferenceCategory>
+	<PreferenceCategory android:title="@string/pref_header_quicklaunchers" >
+		<ListPreference
+			android:dialogTitle="@string/title_select_app"
+			android:key="pref_quicklauncher.112"
+			android:title="@string/pref_title_f1" />
+		<ListPreference
+			android:dialogTitle="@string/title_select_app"
+			android:key="pref_quicklauncher.113"
+			android:title="@string/pref_title_f2" />
+		<ListPreference
+			android:dialogTitle="@string/title_select_app"
+			android:key="pref_quicklauncher.114"
+			android:title="@string/pref_title_f3" />
+		<ListPreference
+			android:dialogTitle="@string/title_select_app"
+			android:key="pref_quicklauncher.115"
+			android:title="@string/pref_title_f4" />
+		<ListPreference
+			android:dialogTitle="@string/title_select_app"
+			android:key="pref_quicklauncher.116"
+			android:title="@string/pref_title_f5" />
+		<ListPreference
+			android:dialogTitle="@string/title_select_app"
+			android:key="pref_quicklauncher.117"
+			android:title="@string/pref_title_f6" />
+		<ListPreference
+			android:dialogTitle="@string/title_select_app"
+			android:key="pref_quicklauncher.118"
+			android:title="@string/pref_title_f7" />
+		<ListPreference
+			android:dialogTitle="@string/title_select_app"
+			android:key="pref_quicklauncher.119"
+			android:title="@string/pref_title_f8" />
+		<ListPreference
+			android:dialogTitle="@string/title_select_app"
+			android:key="pref_quicklauncher.120"
+			android:title="@string/pref_title_f9" />
+		<ListPreference
+			android:dialogTitle="@string/title_select_app"
+			android:key="pref_quicklauncher.121"
+			android:title="@string/pref_title_f10" />
+		<ListPreference
+			android:dialogTitle="@string/title_select_app"
+			android:key="pref_quicklauncher.122"
+			android:title="@string/pref_title_f11" />
+		<ListPreference
+			android:dialogTitle="@string/title_select_app"
+			android:key="pref_quicklauncher.123"
+			android:title="@string/pref_title_f12" />
+	</PreferenceCategory>
+
+</PreferenceScreen>
