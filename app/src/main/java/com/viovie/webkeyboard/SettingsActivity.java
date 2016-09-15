@@ -14,39 +14,10 @@ public class SettingsActivity extends PreferenceActivity implements
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        requestWindowFeature(Window.FEATURE_PROGRESS);
         super.onCreate(savedInstanceState);
-        setProgressBarIndeterminate(true);
-        setProgressBarVisibility(true);
-        new ListTask(this).execute("");
-    }
-
-    /**
-     * Callback for actually building the UI after we got a list of startable
-     * apps.
-     *
-     * @param spi list of startable apps.
-     */
-    protected void onListAvailable(SortablePackageInfo[] spi) {
-        setProgressBarIndeterminate(false);
-        setProgressBarVisibility(false);
-
-        CharSequence[] names = new String[spi.length];
-        CharSequence[] displayNames = new String[spi.length];
-        for (int i = 0; i < spi.length; i++) {
-            names[i] = spi[i].packageName;
-            displayNames[i] = spi[i].displayName;
-        }
 
         addPreferencesFromResource(R.xml.pref_settings);
 
-        for (int i = 112; i <= 123; i++) { // F1 ~ F12
-            ListPreference preference = (ListPreference) findPreference(CtrlInputAction.PREF_QUICKLAUNCHER
-                    + "." + i);
-            preference.setEntries(displayNames);
-            preference.setEntryValues(names);
-            preference.setSummary(((ListPreference) preference).getEntry());
-        }
         SharedPreferences sharedPref = PreferenceManager
                 .getDefaultSharedPreferences(this);
         //FIXME: TO WEB
@@ -58,6 +29,7 @@ public class SettingsActivity extends PreferenceActivity implements
 //			findPreference(TelnetEditorShell.PREF_PASSWORD).setSummary(
 //					R.string.msg_password_set);
 //		}
+
     }
 
     @Override

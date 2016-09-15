@@ -127,8 +127,9 @@ class CtrlInputAction implements Runnable {
                 typeKey(con, KeyEvent.KEYCODE_BACK);
                 break;
             }
-            case 116: { // F5
-                typeKey(con, KeyEvent.KEYCODE_SEARCH);
+            case 70: { // CTRL-F
+                if(ctrlKey)
+                    typeKey(con, KeyEvent.KEYCODE_SEARCH);
                 break;
             }
             case 113: { // F2
@@ -149,42 +150,30 @@ class CtrlInputAction implements Runnable {
                     con.performContextMenuAction(android.R.id.cut);
                 break;
             }
-            case 117: // F6
-            case 118: // F7
-            case 119:
-            case 120:
-            case 121:
-            case 122:
-            case 123: {
-                launchActivity(keyCode);
+            case 116: // F5
+                typeKey(con, KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE);
                 break;
-            }
+            case 117: // F6
+                typeKey(con, KeyEvent.KEYCODE_MEDIA_STOP);
+                break;
+            case 118: // F7
+                typeKey(con, KeyEvent.KEYCODE_MEDIA_PREVIOUS);
+                break;
+            case 119: // F8
+                typeKey(con, KeyEvent.KEYCODE_MEDIA_NEXT);
+                break;
+            case 120: // F9
+                typeKey(con, KeyEvent.KEYCODE_VOLUME_MUTE);
+                break;
+            case 121: // F10
+                typeKey(con, KeyEvent.KEYCODE_VOLUME_DOWN);
+                break;
+            case 122: // F11
+                typeKey(con, KeyEvent.KEYCODE_VOLUME_UP);
+                break;
+            case 123: // F12
+                break;
         }
-    }
-
-    /**
-     * Start an activity on speeddial
-     *
-     * @param code function code.
-     */
-    private void launchActivity(int code) {
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(RemoteKeyboardService.self);
-        String target = sharedPref.getString(PREF_QUICKLAUNCHER + "." + code, "");
-        if (target.equals("")) {
-            Toast.makeText(RemoteKeyboardService.self, R.string.err_quicklauncher_not_assigned,
-                    Toast.LENGTH_SHORT).show();
-            return;
-        }
-        try {
-            RemoteKeyboardService.self.startActivity(RemoteKeyboardService.self
-                    .getPackageManager().getLaunchIntentForPackage(target));
-
-        } catch (Exception exp) {
-            Toast.makeText(RemoteKeyboardService.self, R.string.err_quicklauncher_failed,
-                    Toast.LENGTH_SHORT).show();
-            Log.w(TAG, exp);
-        }
-
     }
 
     /**
