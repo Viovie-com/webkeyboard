@@ -13,14 +13,12 @@ class MsgPackRequest {
     this.xhr.onreadystatechange = () => {
       if (this.xhr.readyState == 4) {
         if (this.xhr.status == 0) {
-          this.set_status("disconnected");
           try {
             this.onError(this.xhr, msgpack.decode(new Uint8Array(this.xhr.response)));
           } catch (e) {
             this.onError(this.xhr, null);
           }
         } else if (200 <= this.xhr.status && this.xhr.status < 400) {
-          this.set_status("connected");
           try {
             this.onSuccess(this.xhr, msgpack.decode(new Uint8Array(this.xhr.response)));
           } catch (e) {
@@ -29,17 +27,6 @@ class MsgPackRequest {
         }
       }
     };
-  }
-
-  set_status(status) {
-    var status_bar = document.getElementById("status");
-    if (status == "connected") {
-      status_bar.innerHTML = "Connected";
-      status_bar["color"] = "green";
-    } else if (status == "Disconnected") {
-      status_bar.innerHTML = "Disconnected";
-      status_bar["color"] = "red";
-    }
   }
 
   get(url) {
@@ -60,9 +47,16 @@ class InputArea {
     this.area = area;
     this.is_compositing = false;
 
+    window.onblur = () => {
+      this.area.focus();
+    }
+    window.onfocus = () => {
+      this.area.focus();
+    }
+    this.area.focus();
+
     this.direct_input();
     this.send();
-    this.focus();
   }
 
   send(mode, code, shift_key, ctrl_key, alt_key) {
@@ -84,7 +78,10 @@ class InputArea {
 
   down(e) {
     if (!e) e = window.event;
-    if (e.ctrlKey || e.altKey || e.keyCode == 13) { // Enter
+    if (e.ctrlKey || e.altKey ||
+      e.keyCode == 13 // Enter
+      ||
+      e.keyCode == 9) { // Tab
       e.preventDefault();
     }
     if (e.keyCode == 115) {
@@ -97,7 +94,7 @@ class InputArea {
 
   recv_text() {
     var request = new MsgPackRequest((state, response) => {
-      this.area.value = response;
+      this.area.innerText = response;
       this.local_input();
     }, null);
     request.get("/text");
@@ -105,10 +102,9 @@ class InputArea {
 
   submit_text() {
     var request = new MsgPackRequest(() => {
-      this.focus();
       this.direct_input();
     }, null);
-    request.post('/fill', this.area.value);
+    request.post('/fill', this.area.innerText);
   }
 
   no_input() {
@@ -134,39 +130,28 @@ class InputArea {
 
   direct_input() {
     this.area.style.backgroundColor = "#f1f1ed";
-    this.area.value = "";
+    this.area.innerText = "";
     this.area.onkeydown = this.down.bind(this);
     this.area.onkeyup = this.up.bind(this);
-    this.area.addEventListener("compositionstart", function() {
+    this.area.addEventListener("compositionstart", () => {
       this.is_compositing = true;
     });
-    this.area.addEventListener("compositionend", function() {
+    this.area.addEventListener("compositionend", () => {
       this.is_compositing = false;
       this.inputCallback();
     });
-
-    window.onblur = () => {
-      this.focus();
-    }
-    window.onfocus = () => {
-      this.focus();
-    }
   }
 
   inputCallback() {
-    if (this.area.is_compositing || this.area.value == "")
+    if (this.is_compositing || this.area.innerText == "")
       return;
 
     var request = new MsgPackRequest();
-    request.post('/append', this.area.value);
-    this.area.value = "";
-  }
-
-  focus() {
-    this.area.focus();
+    request.post('/append', this.area.innerText);
+    this.area.innerText = "";
   }
 }
 
 window.onload = function() {
-  new InputArea(document.getElementById("in"));
+  new InputArea(document.body);
 };
