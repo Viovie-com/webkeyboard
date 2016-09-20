@@ -1,16 +1,18 @@
-package com.viovie.webkeyboard;
+package com.viovie.webkeyboard.task;
 
 import android.view.inputmethod.InputConnection;
+
+import com.viovie.webkeyboard.service.RemoteKeyboardService;
 
 /**
  * Commit text into the current editor.
  *
  * @author patrick
  */
-class TextInputAction implements Runnable {
+public class TextInputAction implements Runnable {
 
-    protected String text;
-    protected boolean replace_text = false;
+    public String text;
+    public boolean replace_text = false;
     private RemoteKeyboardService myService;
 
     public TextInputAction(RemoteKeyboardService service) {

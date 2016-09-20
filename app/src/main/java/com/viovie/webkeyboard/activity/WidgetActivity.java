@@ -1,4 +1,4 @@
-package com.viovie.webkeyboard;
+package com.viovie.webkeyboard.activity;
 
 import android.app.Activity;
 import android.content.Context;

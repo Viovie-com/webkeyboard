@@ -17,7 +17,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <service
-            android:name=".RemoteKeyboardService"
+            android:name=".service.RemoteKeyboardService"
             android:permission="android.permission.BIND_INPUT_METHOD" >
             <intent-filter>
                 <action android:name="android.view.InputMethod" />
@@ -29,7 +29,7 @@
         </service>
 
         <activity
-            android:name=".MainActivity"
+            android:name=".activity.MainActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -45,7 +45,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".WidgetActivity"
+            android:name=".activity.WidgetActivity"
             android:excludeFromRecents="true"
             android:label="@string/app_name"
             android:noHistory="true"
@@ -64,28 +64,28 @@
         </receiver>
 
         <activity
-            android:name=".ReplacementsListActivity"
+            android:name=".activity.ReplacementsListActivity"
             android:label="@string/title_activity_replacements_list"
-            android:parentActivityName=".MainActivity" >
+            android:parentActivityName=".activity.MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+                android:value=".activity.MainActivity" />
         </activity>
         <activity
-            android:name=".ReplacementActivity"
+            android:name=".activity.ReplacementActivity"
             android:label="@string/title_activity_replacement"
-            android:parentActivityName=".ReplacementsListActivity" >
+            android:parentActivityName=".activity.ReplacementsListActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ReplacementsListActivity" />
+                android:value=".activity.ReplacementsListActivity" />
         </activity>
         <activity
-            android:name=".SettingsActivity"
+            android:name=".activity.SettingsActivity"
             android:label="@string/title_activity_settings"
-            android:parentActivityName=".MainActivity" >
+            android:parentActivityName=".activity.MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+                android:value=".activity.MainActivity" />
         </activity>
     </application>
 

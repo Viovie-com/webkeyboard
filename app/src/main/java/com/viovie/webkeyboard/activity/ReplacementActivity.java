@@ -1,4 +1,4 @@
-package com.viovie.webkeyboard;
+package com.viovie.webkeyboard.activity;
 
 import android.app.Activity;
 import android.content.ContentValues;
@@ -9,6 +9,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import com.viovie.webkeyboard.R;
+import com.viovie.webkeyboard.service.RemoteKeyboardService;
+import com.viovie.webkeyboard.Schema;
 
 /**
  * Editor for adding/editing shortcuts and their replacements.

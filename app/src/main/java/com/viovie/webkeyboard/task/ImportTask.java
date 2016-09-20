@@ -1,9 +1,13 @@
-package com.viovie.webkeyboard;
+package com.viovie.webkeyboard.task;
 
 import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.widget.Toast;
+
+import com.viovie.webkeyboard.R;
+import com.viovie.webkeyboard.Schema;
+import com.viovie.webkeyboard.activity.ReplacementsListActivity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,7 +26,7 @@ import java.util.Iterator;
  *
  * @author patrick
  */
-class ImportTask extends AsyncTask<String, Integer, String> {
+public class ImportTask extends AsyncTask<String, Integer, String> {
 
     private ReplacementsListActivity master;
 

@@ -24,7 +24,7 @@
     <string name="no_replacements">No word substitutions defined. Use the plus symbol to add one.</string>
     <string name="err_no_replacement">"No substitute known for: %1$s"</string>
     <string name="mi_clear_list">Clear List</string>
-    <string name="homepage">about:blank</string>
+    <string name="homepage">https://github.com/Viovie-com/webkeyboard</string>
     <string name="title_confirm">Please confirm</string>
     <string name="msg_really_delete">Do you really want to remove all entries from the list?</string>
     <string name="mi_export">Export</string>

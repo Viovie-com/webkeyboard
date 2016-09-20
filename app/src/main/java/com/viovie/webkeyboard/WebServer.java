@@ -4,6 +4,11 @@ import android.content.Context;
 import android.util.Log;
 import android.view.inputmethod.ExtractedTextRequest;
 
+import com.viovie.webkeyboard.service.RemoteKeyboardService;
+import com.viovie.webkeyboard.task.ActionRunner;
+import com.viovie.webkeyboard.task.CtrlInputAction;
+import com.viovie.webkeyboard.task.TextInputAction;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.msgpack.core.MessageBufferPacker;

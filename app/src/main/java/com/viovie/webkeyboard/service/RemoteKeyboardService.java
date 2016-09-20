@@ -1,4 +1,4 @@
-package com.viovie.webkeyboard;
+package com.viovie.webkeyboard.service;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -24,6 +24,11 @@ import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
+import com.viovie.webkeyboard.R;
+import com.viovie.webkeyboard.Schema;
+import com.viovie.webkeyboard.WebServer;
+import com.viovie.webkeyboard.activity.MainActivity;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.HashMap;
@@ -40,15 +45,15 @@ public class RemoteKeyboardService extends InputMethodService implements
     /**
      * Reference to the running service
      */
-    protected static RemoteKeyboardService self;
+    public static RemoteKeyboardService self;
     /**
      * For posting InputActions on the UI thread.
      */
-    protected Handler handler;
+    public Handler handler;
     /**
      * Contains key/value replacement pairs
      */
-    protected HashMap<String, String> replacements;
+    public HashMap<String, String> replacements;
 
     private WebServer webServer;
 
@@ -217,7 +222,7 @@ public class RemoteKeyboardService extends InputMethodService implements
     /**
      * Load the replacements map from the database
      */
-    protected void loadReplacements() {
+    public void loadReplacements() {
         HashMap<String, String> tmp = new HashMap<String, String>();
         SQLiteDatabase database = new Schema(RemoteKeyboardService.self)
                 .getReadableDatabase();

@@ -1,4 +1,4 @@
-package com.viovie.webkeyboard;
+package com.viovie.webkeyboard.task;
 
 /**
  * Wrapper for InputAction. We cannot post InputActions directly to the
@@ -8,12 +8,12 @@ package com.viovie.webkeyboard;
  *
  * @author patrick
  */
-class ActionRunner implements Runnable {
+public class ActionRunner implements Runnable {
 
     private Runnable action;
     private boolean finished;
 
-    protected void setAction(Runnable action) {
+    public void setAction(Runnable action) {
         this.action = action;
         this.finished = false;
     }

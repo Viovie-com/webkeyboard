@@ -1,4 +1,4 @@
-package com.viovie.webkeyboard;
+package com.viovie.webkeyboard.activity;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
@@ -14,6 +14,11 @@ import android.view.View;
 import android.view.Window;
 import android.widget.EditText;
 import android.widget.ListView;
+
+import com.viovie.webkeyboard.task.ImportTask;
+import com.viovie.webkeyboard.R;
+import com.viovie.webkeyboard.service.RemoteKeyboardService;
+import com.viovie.webkeyboard.Schema;
 
 /**
  * Provides a list of all the shortcut/phrase replacement patterns we got.
@@ -125,7 +130,7 @@ public class ReplacementsListActivity extends ListActivity implements
      *
      * @param database database handle
      */
-    protected void load(SQLiteDatabase database) {
+    public void load(SQLiteDatabase database) {
         int[] to = {R.id.entry_key, R.id.entry_value};
         cursor = database.query(Schema.TABLE_REPLACEMENTS, COLUMNS, null, null,
                 null, null, Schema.COLUMN_KEY);

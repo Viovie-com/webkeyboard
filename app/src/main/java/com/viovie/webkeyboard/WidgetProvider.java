@@ -8,6 +8,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.widget.RemoteViews;
 
+import com.viovie.webkeyboard.activity.WidgetActivity;
+
 public class WidgetProvider extends AppWidgetProvider {
 
     public WidgetProvider() {

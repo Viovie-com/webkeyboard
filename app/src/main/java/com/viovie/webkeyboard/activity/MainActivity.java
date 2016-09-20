@@ -1,4 +1,4 @@
-package com.viovie.webkeyboard;
+package com.viovie.webkeyboard.activity;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -14,6 +14,9 @@ import android.view.MenuItem;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
+
+import com.viovie.webkeyboard.R;
+import com.viovie.webkeyboard.service.RemoteKeyboardService;
 
 import java.util.Iterator;
 import java.util.List;

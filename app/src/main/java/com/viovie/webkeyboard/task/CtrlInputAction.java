@@ -1,15 +1,15 @@
-package com.viovie.webkeyboard;
+package com.viovie.webkeyboard.task;
 
-import android.content.SharedPreferences;
 import android.os.SystemClock;
-import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.widget.Toast;
+
+import com.viovie.webkeyboard.R;
+import com.viovie.webkeyboard.service.RemoteKeyboardService;
 
 /**
  * Models a key event sent from the remote keyboard via the telnet protocol and
@@ -18,7 +18,7 @@ import android.widget.Toast;
  *
  * @author patrick
  */
-class CtrlInputAction implements Runnable {
+public class CtrlInputAction implements Runnable {
 
     public static final String TAG = "InputAction";
     public static final String PREF_QUICKLAUNCHER = "pref_quicklauncher";
@@ -26,10 +26,10 @@ class CtrlInputAction implements Runnable {
     /**
      * A control character (anything thats not printable)
      */
-    protected int keyCode;
-    protected boolean ctrlKey = false;
-    protected boolean altKey = false;
-    protected boolean shiftKey = false;
+    public int keyCode;
+    public boolean ctrlKey = false;
+    public boolean altKey = false;
+    public boolean shiftKey = false;
 
     /**
      * For sending raw key presses to the editor
