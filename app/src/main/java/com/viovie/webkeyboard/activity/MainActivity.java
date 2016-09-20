@@ -6,8 +6,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,12 +15,12 @@ import android.widget.TextView;
 
 import com.viovie.webkeyboard.R;
 import com.viovie.webkeyboard.service.RemoteKeyboardService;
+import com.viovie.webkeyboard.util.InternetUtil;
 
 import java.util.Iterator;
 import java.util.List;
 
-public class MainActivity extends Activity implements
-        DialogInterface.OnClickListener {
+public class MainActivity extends Activity {
 
 
     @Override
@@ -35,51 +33,26 @@ public class MainActivity extends Activity implements
     protected void onResume() {
         super.onResume();
 
-        // FIXME: This is anything but pretty! Apparently someone at Google thinks
-        // that WLAN is ipv4 only.
-        WifiManager wifiManager = (WifiManager) getSystemService(WIFI_SERVICE);
-        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
-        int addr = wifiInfo.getIpAddress();
-        String ip = (addr & 0xFF) + "." + ((addr >> 8) & 0xFF) + "."
-                + ((addr >> 16) & 0xFF) + "." + ((addr >> 24) & 0xFF);
+        String ipAddress = InternetUtil.getWifiIpAddress(this);
 
-        TextView tv = (TextView) findViewById(R.id.quickinstructions);
-        tv.setText(getResources().getString(R.string.app_quickinstuctions, ip));
+        TextView instructionText = (TextView) findViewById(R.id.quickinstructions);
+        instructionText.setText(getString(R.string.app_quickinstuctions, ipAddress));
 
-        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        List<InputMethodInfo> enabled = imm.getEnabledInputMethodList();
-        Iterator<InputMethodInfo> it = enabled.iterator();
-
-        boolean available = false;
-
-        while (it.hasNext()) {
-            available = it.next().getServiceName()
-                    .equals(RemoteKeyboardService.class.getCanonicalName());
-            if (available) {
-                break;
-            }
-        }
-        if (!available) {
+        boolean isEnabled = isWebKeyboardEnabled();
+        if (!isEnabled) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setMessage(R.string.err_notenabled)
                     .setTitle(R.string.err_notenabled_title)
-                    .setPositiveButton(android.R.string.yes, this)
-                    .setNegativeButton(android.R.string.no, this).create().show();
-
+                    .setPositiveButton(android.R.string.yes, dialogOnClick)
+                    .setNegativeButton(android.R.string.no, dialogOnClick)
+                    .create()
+                    .show();
         }
 
-        String shared = getIntent().getStringExtra(Intent.EXTRA_TEXT);
-        if (available && shared != null) {
-            tv = (TextView) findViewById(R.id.typetest);
-            tv.setText(shared);
-            //FIXME: TO WEB
-//			if (TelnetEditorShell.self != null) {
-//				TelnetEditorShell.self.showText(shared);
-//				Toast.makeText(this, R.string.msg_sent, Toast.LENGTH_SHORT).show();
-//			}
-//			else {
-//				Toast.makeText(this, R.string.err_noclient, Toast.LENGTH_SHORT).show();
-//			}
+        String inputText = getIntent().getStringExtra(Intent.EXTRA_TEXT);
+        if (isEnabled && inputText != null) {
+            TextView inputTextView = (TextView) findViewById(R.id.typetest);
+            inputTextView.setText(inputText);
         }
     }
 
@@ -94,8 +67,8 @@ public class MainActivity extends Activity implements
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.item_help: {
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW,
-                        Uri.parse(getString(R.string.homepage)));
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW);
+                browserIntent.setData(Uri.parse(getString(R.string.homepage)));
                 startActivity(browserIntent);
                 break;
             }
@@ -116,13 +89,35 @@ public class MainActivity extends Activity implements
         return false;
     }
 
-    @Override
-    public void onClick(DialogInterface dialog, int which) {
-        // We are called from the RK is not enabled as IME method.
-        if (which == DialogInterface.BUTTON_POSITIVE) {
-            startActivity(new Intent(
-                    android.provider.Settings.ACTION_INPUT_METHOD_SETTINGS));
+    private DialogInterface.OnClickListener dialogOnClick = new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            // We are called from the RK is not enabled as IME method.
+            if (which == DialogInterface.BUTTON_POSITIVE) {
+                startActivity(new Intent(android.provider.Settings.ACTION_INPUT_METHOD_SETTINGS));
+            }
         }
-    }
+    };
 
+    /**
+     *
+     * @return
+     */
+    private boolean isWebKeyboardEnabled() {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        List<InputMethodInfo> enabledList = imm.getEnabledInputMethodList();
+        Iterator<InputMethodInfo> it = enabledList.iterator();
+
+        boolean available = false;
+        while (it.hasNext()) {
+            available = it.next()
+                    .getServiceName()
+                    .equals(RemoteKeyboardService.class.getCanonicalName());
+            if (available) {
+                break;
+            }
+        }
+
+        return available;
+    }
 }
