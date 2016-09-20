@@ -58,7 +58,7 @@ public class WebServer extends NanoHTTPD {
         } else if (uri.equals("/style.css")) {
             return newFixedLengthResponse(Response.Status.OK, "text/css", style_css);
         }
-        
+
         if (uri.equals("/key")) {
             if (Method.POST.equals(session.getMethod())) {
                 MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(session.getInputStream());
@@ -135,7 +135,7 @@ public class WebServer extends NanoHTTPD {
     }
 
     private String loadLocalFile(@RawRes int id) throws IOException {
-        InputStream is = mContext.getResources().openRawResource(R.raw.index);
+        InputStream is = mContext.getResources().openRawResource(id);
         byte[] buffer = new byte[is.available()];
         is.read(buffer);
         is.close();
