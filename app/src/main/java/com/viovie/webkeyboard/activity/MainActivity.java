@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -41,8 +40,8 @@ public class MainActivity extends Activity {
         boolean isEnabled = isWebKeyboardEnabled();
         if (!isEnabled) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage(R.string.err_notenabled)
-                    .setTitle(R.string.err_notenabled_title)
+            builder.setMessage(R.string.dialog_error_not_enabled)
+                    .setTitle(R.string.dialog_error_not_enabled_title)
                     .setPositiveButton(android.R.string.yes, dialogOnClick)
                     .setNegativeButton(android.R.string.no, dialogOnClick)
                     .create()
@@ -66,24 +65,13 @@ public class MainActivity extends Activity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.item_help: {
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW);
-                browserIntent.setData(Uri.parse(getString(R.string.homepage)));
-                startActivity(browserIntent);
-                break;
-            }
-            case R.id.item_replacements: {
-                startActivity(new Intent(this, ReplacementsListActivity.class));
-                break;
-            }
-            case R.id.item_settings: {
-                startActivity(new Intent(this, SettingsActivity.class));
-                break;
-            }
-            case R.id.item_select: {
+            case R.id.keyboard_select: {
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.showInputMethodPicker();
                 break;
+            }
+            case R.id.keyboard_setting: {
+                showKeyboardSetting();
             }
         }
         return false;
@@ -94,10 +82,14 @@ public class MainActivity extends Activity {
         public void onClick(DialogInterface dialog, int which) {
             // We are called from the RK is not enabled as IME method.
             if (which == DialogInterface.BUTTON_POSITIVE) {
-                startActivity(new Intent(android.provider.Settings.ACTION_INPUT_METHOD_SETTINGS));
+                showKeyboardSetting();
             }
         }
     };
+
+    private void showKeyboardSetting() {
+        startActivity(new Intent(android.provider.Settings.ACTION_INPUT_METHOD_SETTINGS));
+    }
 
     /**
      *

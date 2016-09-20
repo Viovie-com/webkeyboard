@@ -28,6 +28,7 @@ import com.viovie.webkeyboard.R;
 import com.viovie.webkeyboard.Schema;
 import com.viovie.webkeyboard.WebServer;
 import com.viovie.webkeyboard.activity.MainActivity;
+import com.viovie.webkeyboard.util.InternetUtil;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -46,10 +47,12 @@ public class RemoteKeyboardService extends InputMethodService implements
      * Reference to the running service
      */
     public static RemoteKeyboardService self;
+
     /**
      * For posting InputActions on the UI thread.
      */
     public Handler handler;
+
     /**
      * Contains key/value replacement pairs
      */
@@ -108,49 +111,11 @@ public class RemoteKeyboardService extends InputMethodService implements
 
     @Override
     public void onPress(int primaryCode) {
-        // SEE: res/xml/keyboarddef.xml for the definitions.
         switch (primaryCode) {
             case 0: {
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.showInputMethodPicker();
                 break;
-            }
-            case 1: {
-                /*
-				 * Intent intent = new Intent(this, SettingsActivity.class);
-				 * intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-				 * startActivity(intent);
-				 */
-                break;
-            }
-            case 2: {
-                try {
-                    InputConnection con = getCurrentInputConnection();
-                    CharSequence txt = con.getSelectedText(0);
-                    if (txt == null) {
-                        txt = getCurrentInputConnection().getExtractedText(
-                                new ExtractedTextRequest(), 0).text;
-                    }
-                    //FIXME: TO WEB
-//					TelnetEditorShell.self.showText(txt + "");
-                    Toast.makeText(this, R.string.msg_sent, Toast.LENGTH_SHORT).show();
-                } catch (Exception exp) {
-                    Toast.makeText(this, R.string.err_noclient, Toast.LENGTH_SHORT)
-                            .show();
-                }
-                break;
-            }
-            case 3: {
-                //FIXME: TO WEB
-//					if (TelnetEditorShell.self != null) {
-//						TelnetEditorShell.self.disconnect();
-//						Toast.makeText(this, R.string.msg_client_disconnected,
-//								Toast.LENGTH_SHORT).show();
-//					}
-//					else {
-//						Toast.makeText(this, R.string.err_noclient, Toast.LENGTH_SHORT)
-//								.show();
-//					}
             }
         }
     }
@@ -189,21 +154,13 @@ public class RemoteKeyboardService extends InputMethodService implements
      * @param remote the remote host we are connected to or null if not connected.
      */
     protected void updateNotification(InetAddress remote) {
-        String title = getResources().getString(R.string.notification_title);
+        String title = getString(R.string.notification_title);
         String content = null;
         if (remote == null) {
-            // FIXME: This is anything but pretty! Apparently someone at Google thinks
-            // that WLAN is ipv4 only.
-            WifiManager wifiManager = (WifiManager) getSystemService(WIFI_SERVICE);
-            WifiInfo wifiInfo = wifiManager.getConnectionInfo();
-            int addr = wifiInfo.getIpAddress();
-            String ip = (addr & 0xFF) + "." + ((addr >> 8) & 0xFF) + "."
-                    + ((addr >> 16) & 0xFF) + "." + ((addr >> 24) & 0xFF);
-            content = getResources()
-                    .getString(R.string.notification_waiting, "" + ip);
+            String ipAddress = InternetUtil.getWifiIpAddress(this);
+            content = getString(R.string.notification_waiting, "" + ipAddress);
         } else {
-            content = getResources().getString(R.string.notification_peer,
-                    remote.getHostName());
+            content = getString(R.string.notification_peer, remote.getHostName());
         }
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);

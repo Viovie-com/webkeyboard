@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">網路鍵盤</string>
+    <string name="app_quickinstuctions">網路鍵盤，是透過電腦在網頁上輸入文字，就可在您的手機即時出現文字！\n\n首先設定網路鍵盤為您的輸入法，並連線到Wifi；接著使用電腦連線到同一個Wifi，開啟瀏覽器連線到\nhttp://%1$s:8080\n接著在網頁上輸入文字，就可在您的手機顯示文字</string>
+
+    <string name="menu_keyboard_select">切換鍵盤</string>
+    <string name="menu_keyboard_setting">鍵盤設定</string>
+
+    <string name="text_test_hint">在這裡輸入文字，測試您的連線</string>
+
+    <string name="dialog_error_not_enabled_title">網路鍵盤尚未啟用</string>
+    <string name="dialog_error_not_enabled">是否要現在開啟鍵盤設定，啟用網路鍵盤？</string>
+
+    <string name="notification_title">網路鍵盤</string>
+    <string name="notification_waiting">Listening on %1$s Port 8080</string>
+    <string name="notification_peer">Connected to: %1$s</string>
+</resources>

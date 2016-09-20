@@ -1,7 +1,4 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
-    <item android:id="@+id/item_select" android:title="@string/mi_select" android:showAsAction="ifRoom"/>
-    <item android:id="@+id/item_settings" android:title="@string/mi_settings"/>
-    <item android:id="@+id/item_replacements" android:title="@string/mi_replacements"/>
-    <item android:id="@+id/item_help" android:title="@string/mi_help"/>
-
+    <item android:id="@+id/keyboard_select" android:title="@string/menu_keyboard_select" android:showAsAction="ifRoom"/>
+    <item android:id="@+id/keyboard_setting" android:title="@string/menu_keyboard_setting" android:showAsAction="ifRoom"/>
 </menu>

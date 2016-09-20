@@ -1,18 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <string name="app_name">Web Keyboard</string>
-    <string name="err_noclient">No client connected!</string>
+    <string name="app_quickinstuctions">Set Web Keyboard as your input method, then touch any textfield to activate it. Connect to http://%1$s:8080 with a morden web browser  and type!</string>
+
+    <string name="menu_keyboard_select">Select Keyboard</string>
+    <string name="menu_keyboard_setting">Keyboard Setting</string>
+
+    <string name="text_test_hint">Test your connection here!</string>
+
+    <string name="dialog_error_not_enabled_title">Input method is not enable</string>
+    <string name="dialog_error_not_enabled">Open system settings to enable it now?</string>
+
     <string name="notification_title">Web Keyboard</string>
     <string name="notification_waiting">Listening on %1$s Port 8080</string>
+    <string name="notification_peer">Connected to: %1$s</string>
+
+    <string name="err_noclient">No client connected!</string>
     <string name="title_activity_main">MainActivity</string>
-    <string name="testtext">Test your connection here!</string>
     <string name="mi_help">Help</string>
     <string name="mi_select">Select Keyboard</string>
-    <string name="err_notenabled">Open system settings to enable it now?</string>
-    <string name="err_notenabled_title">Input method is not enable</string>
-    <string name="app_quickinstuctions">Set Web Keyboard as your input method, then touch any textfield to activate it. Connect to http://%1$s:8080 with a morden web browser  and type!</string>
-    <string name="notification_peer">Connected to: %1$s</string>
     <string name="msg_sent">Text sent to client</string>
     <string name="title_activity_replacements_list">Replacements</string>
     <string name="mi_add_replacement">Add</string>

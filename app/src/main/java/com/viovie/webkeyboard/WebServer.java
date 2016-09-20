@@ -1,7 +1,7 @@
 package com.viovie.webkeyboard;
 
 import android.content.Context;
-import android.util.Log;
+import android.support.annotation.RawRes;
 import android.view.inputmethod.ExtractedTextRequest;
 
 import com.viovie.webkeyboard.service.RemoteKeyboardService;
@@ -32,31 +32,16 @@ public class WebServer extends NanoHTTPD {
     String style_css = null;
     String msgpack_min_js = null;
 
-    private Context context;
+    private Context mContext;
 
     public WebServer(Context context, int port) throws IOException {
         super(port);
-        this.context = context;
+        this.mContext = context;
 
-        InputStream is = context.getResources().openRawResource(R.raw.index);
-        byte[] buffer = new byte[is.available()];
-        is.read(buffer);
-        index_html = new String(buffer);
-
-        is = context.getResources().openRawResource(R.raw.script);
-        buffer = new byte[is.available()];
-        is.read(buffer);
-        script_js = new String(buffer);
-
-        is = context.getResources().openRawResource(R.raw.style);
-        buffer = new byte[is.available()];
-        is.read(buffer);
-        style_css = new String(buffer);
-
-        is = context.getResources().openRawResource(R.raw.msgpack_min);
-        buffer = new byte[is.available()];
-        is.read(buffer);
-        msgpack_min_js = new String(buffer);
+        index_html = loadLocalFile(R.raw.index);
+        script_js = loadLocalFile(R.raw.script);
+        style_css = loadLocalFile(R.raw.style);
+        msgpack_min_js = loadLocalFile(R.raw.msgpack_min);
     }
 
     @Override
@@ -65,13 +50,16 @@ public class WebServer extends NanoHTTPD {
         Map<String, String> header = session.getHeaders();
         String uri = session.getUri();
 
+        // Return file
         if (uri.equals("/script.js")) {
             return newFixedLengthResponse(script_js);
         } else if (uri.equals("/msgpack.min.js")) {
             return newFixedLengthResponse(msgpack_min_js);
         } else if (uri.equals("/style.css")) {
             return newFixedLengthResponse(Response.Status.OK, "text/css", style_css);
-        } else if (uri.equals("/key")) {
+        }
+        
+        if (uri.equals("/key")) {
             if (Method.POST.equals(session.getMethod())) {
                 MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(session.getInputStream());
                 JSONObject jsonObj = null;
@@ -140,11 +128,17 @@ public class WebServer extends NanoHTTPD {
                 }
             }
             return newFixedLengthResponse(null);
-        } else {
-            Log.d("URI", uri);
-            Log.d("params", parms.toString());
-            Log.d("header", header.toString());
-            return newFixedLengthResponse(index_html);
         }
+
+        // Default return index.html
+        return newFixedLengthResponse(index_html);
+    }
+
+    private String loadLocalFile(@RawRes int id) throws IOException {
+        InputStream is = mContext.getResources().openRawResource(R.raw.index);
+        byte[] buffer = new byte[is.available()];
+        is.read(buffer);
+        is.close();
+        return new String(buffer);
     }
 }
