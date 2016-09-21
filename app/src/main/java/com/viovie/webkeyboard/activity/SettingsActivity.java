@@ -88,10 +88,6 @@ public class SettingsActivity extends PreferenceActivity implements
 //			findPreference(TelnetEditorShell.PREF_PASSWORD).setSummary(
 //					R.string.msg_password_set);
 //		}
-
-        if (RemoteKeyboardService.self != null) {
-            RemoteKeyboardService.self.updateFullscreenMode();
-        }
     }
 
 }
