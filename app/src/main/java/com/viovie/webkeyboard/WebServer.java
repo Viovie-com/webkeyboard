@@ -2,6 +2,7 @@ package com.viovie.webkeyboard;
 
 import android.content.res.Resources;
 import android.support.annotation.RawRes;
+import android.util.Log;
 import android.view.inputmethod.ExtractedTextRequest;
 
 import com.viovie.webkeyboard.service.RemoteKeyboardService;
@@ -22,22 +23,6 @@ import java.util.Map;
 import fi.iki.elonen.NanoHTTPD;
 
 public class WebServer extends NanoHTTPD {
-    private static String index_html = null;
-    private static String script_js = null;
-    private static String style_css = null;
-    private static String msgpack_min_js = null;
-
-    static {
-        try {
-            index_html = loadLocalFile(R.raw.index);
-            script_js = loadLocalFile(R.raw.script);
-            style_css = loadLocalFile(R.raw.style);
-            msgpack_min_js = loadLocalFile(R.raw.msgpack_min);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     private RemoteKeyboardService service;
 
     public WebServer(RemoteKeyboardService service, int port) {
@@ -53,11 +38,11 @@ public class WebServer extends NanoHTTPD {
 
         // Return file
         if (uri.equals("/script.js")) {
-            return newFixedLengthResponse(script_js);
+            return newFixedLengthResponse(loadLocalFile(R.raw.script));
         } else if (uri.equals("/msgpack.min.js")) {
-            return newFixedLengthResponse(msgpack_min_js);
+            return newFixedLengthResponse(loadLocalFile(R.raw.msgpack_min));
         } else if (uri.equals("/style.css")) {
-            return newFixedLengthResponse(Response.Status.OK, "text/css", style_css);
+            return newFixedLengthResponse(Response.Status.OK, "text/css", loadLocalFile(R.raw.style));
         }
 
         if (uri.equals("/key")) {
@@ -135,15 +120,27 @@ public class WebServer extends NanoHTTPD {
         }
 
         // Default return index.html
-        return newFixedLengthResponse(index_html);
+        return newFixedLengthResponse(loadLocalFile(R.raw.index));
     }
 
-    private static String loadLocalFile(@RawRes int id) throws IOException {
-        InputStream is = Resources.getSystem().openRawResource(id);
-        byte[] buffer = new byte[is.available()];
-        is.read(buffer);
-        is.close();
-        return new String(buffer);
+    private String loadLocalFile(@RawRes int id) {
+        String data = null;
+        InputStream is = null;
+        try {
+            is =  service.getResources().openRawResource(id);
+            byte[] buffer = new byte[is.available()];
+            is.read(buffer);
+            data = new String(buffer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                is.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+        return data;
     }
 
     /**
