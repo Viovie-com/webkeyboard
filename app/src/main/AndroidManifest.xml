@@ -64,22 +64,6 @@
         </receiver>
 
         <activity
-            android:name=".activity.ReplacementsListActivity"
-            android:label="@string/title_activity_replacements_list"
-            android:parentActivityName=".activity.MainActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".activity.MainActivity" />
-        </activity>
-        <activity
-            android:name=".activity.ReplacementActivity"
-            android:label="@string/title_activity_replacement"
-            android:parentActivityName=".activity.ReplacementsListActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".activity.ReplacementsListActivity" />
-        </activity>
-        <activity
             android:name=".activity.SettingsActivity"
             android:label="@string/title_activity_settings"
             android:parentActivityName=".activity.MainActivity" >

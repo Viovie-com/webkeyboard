@@ -5,7 +5,6 @@ import android.support.annotation.RawRes;
 import android.view.inputmethod.ExtractedTextRequest;
 
 import com.viovie.webkeyboard.service.RemoteKeyboardService;
-import com.viovie.webkeyboard.task.ActionRunner;
 import com.viovie.webkeyboard.task.CtrlInputAction;
 import com.viovie.webkeyboard.task.TextInputAction;
 
@@ -140,5 +139,41 @@ public class WebServer extends NanoHTTPD {
         is.read(buffer);
         is.close();
         return new String(buffer);
+    }
+
+    /**
+     * Wrapper for InputAction. We cannot post InputActions directly to the
+     * messagequeue because we use commitText() and sendKeyEvent(). The later
+     * executes asynchronously and hence fast commits (e.g. via copy&paste) result
+     * in linebreaks being out of order.
+     *
+     * @author patrick
+     */
+    public class ActionRunner implements Runnable {
+
+        private Runnable action;
+        private boolean finished;
+
+        public void setAction(Runnable action) {
+            this.action = action;
+            this.finished = false;
+        }
+
+        public void run() {
+            action.run();
+            synchronized (this) {
+                finished = true;
+                notify();
+            }
+        }
+
+        public synchronized void waitResult() {
+            while (!finished) {
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                }
+            }
+        }
     }
 }

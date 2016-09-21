@@ -21,7 +21,6 @@ import com.viovie.webkeyboard.service.RemoteKeyboardService;
 public class CtrlInputAction implements Runnable {
 
     public static final String TAG = "InputAction";
-    public static final String PREF_QUICKLAUNCHER = "pref_quicklauncher";
 
     /**
      * A control character (anything thats not printable)
@@ -88,8 +87,7 @@ public class CtrlInputAction implements Runnable {
                     typeKey(con, KeyEvent.KEYCODE_DPAD_DOWN);
                 break;
             }
-            case 45: {
-                replaceText(con);
+            case 45: { // Insert
                 break;
             }
             case 46: { // Del
@@ -203,32 +201,6 @@ public class CtrlInputAction implements Runnable {
     private void typeKey(InputConnection con, int key) {
         con.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, key));
         con.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, key));
-    }
-
-    /**
-     * Try to replace the current word with its substitution.
-     */
-    private void replaceText(InputConnection con) {
-        ExtractedText txt = con.getExtractedText(new ExtractedTextRequest(), 0);
-        if (txt != null) {
-            int end = txt.text.toString().indexOf(" ", txt.selectionEnd);
-            if (end == -1) {
-                end = txt.text.length();
-            }
-            int start = txt.text.toString().lastIndexOf(" ", txt.selectionEnd - 1);
-            start++;
-            String sel = txt.text.subSequence(start, end).toString();
-            String rep = myService.replacements.get(sel);
-            if (rep != null) {
-                con.setComposingRegion(start, end);
-                con.setComposingText(rep, 1);
-                con.finishComposingText();
-            } else {
-                String err = myService.getResources().getString(
-                        R.string.err_no_replacement, sel);
-                Toast.makeText(myService, err, Toast.LENGTH_SHORT).show();
-            }
-        }
     }
 
     /**

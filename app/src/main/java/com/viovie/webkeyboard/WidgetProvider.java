@@ -23,8 +23,7 @@ public class WidgetProvider extends AppWidgetProvider {
         RemoteViews view = new RemoteViews(getClass().getPackage().getName(),
                 R.layout.widget);
         Intent intent = new Intent(context, WidgetActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent,
-                0);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
 
         view.setOnClickPendingIntent(R.id.widgeticon, pendingIntent);
         ComponentName componentName = new ComponentName(context.getPackageName(),

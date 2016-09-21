@@ -8,6 +8,6 @@
         android:id="@+id/widgeticon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_widget" />
+        android:src="@drawable/ic_launcher" />
 
 </LinearLayout>

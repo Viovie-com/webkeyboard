@@ -5,27 +5,19 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.inputmethodservice.InputMethodService;
 import android.inputmethodservice.Keyboard;
 import android.inputmethodservice.KeyboardView;
 import android.inputmethodservice.KeyboardView.OnKeyboardActionListener;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.ExtractedTextRequest;
-import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Toast;
 
 import com.viovie.webkeyboard.R;
-import com.viovie.webkeyboard.Schema;
 import com.viovie.webkeyboard.WebServer;
 import com.viovie.webkeyboard.activity.MainActivity;
 import com.viovie.webkeyboard.util.InternetUtil;
@@ -53,11 +45,6 @@ public class RemoteKeyboardService extends InputMethodService implements
      */
     public Handler handler;
 
-    /**
-     * Contains key/value replacement pairs
-     */
-    public HashMap<String, String> replacements;
-
     private WebServer webServer;
 
     @Override
@@ -74,7 +61,6 @@ public class RemoteKeyboardService extends InputMethodService implements
             webServer = new WebServer(this, 8080);
             webServer.start();
             updateNotification(null);
-            loadReplacements();
         } catch (IOException e) {
             Log.w(TAG, e);
         }
@@ -175,24 +161,4 @@ public class RemoteKeyboardService extends InputMethodService implements
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         notificationManager.notify(NOTIFICATION, builder.build());
     }
-
-    /**
-     * Load the replacements map from the database
-     */
-    public void loadReplacements() {
-        HashMap<String, String> tmp = new HashMap<String, String>();
-        SQLiteDatabase database = new Schema(RemoteKeyboardService.self)
-                .getReadableDatabase();
-        String[] columns = {Schema.COLUMN_KEY, Schema.COLUMN_VALUE};
-        Cursor cursor = database.query(Schema.TABLE_REPLACEMENTS, columns, null,
-                null, null, null, null);
-        cursor.moveToFirst();
-        while (!cursor.isAfterLast()) {
-            tmp.put(cursor.getString(0), cursor.getString(1));
-            cursor.moveToNext();
-        }
-        database.close();
-        replacements = tmp;
-    }
-
 }
