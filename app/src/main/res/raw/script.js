@@ -79,9 +79,10 @@ class InputArea {
   down(e) {
     if (!e) e = window.event;
     if (e.ctrlKey || e.altKey ||
-      e.keyCode == 13 // Enter
-      ||
-      e.keyCode == 9) { // Tab
+      e.keyCode == 13 || // Enter
+      e.keyCode == 9 || // Tab
+      (e.keyCode >= 112 && e.keyCode <= 123) // F1~F12
+    ) {
       e.preventDefault();
     }
     if (e.keyCode == 115) {
