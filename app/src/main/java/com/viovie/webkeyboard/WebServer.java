@@ -1,6 +1,6 @@
 package com.viovie.webkeyboard;
 
-import android.content.Context;
+import android.content.res.Resources;
 import android.support.annotation.RawRes;
 import android.view.inputmethod.ExtractedTextRequest;
 
@@ -22,25 +22,27 @@ import java.util.Map;
 import fi.iki.elonen.NanoHTTPD;
 
 public class WebServer extends NanoHTTPD {
+    private static String index_html = null;
+    private static String script_js = null;
+    private static String style_css = null;
+    private static String msgpack_min_js = null;
 
-    TextInputAction tia = new TextInputAction(RemoteKeyboardService.self);
-    CtrlInputAction cia = new CtrlInputAction(RemoteKeyboardService.self);
+    static {
+        try {
+            index_html = loadLocalFile(R.raw.index);
+            script_js = loadLocalFile(R.raw.script);
+            style_css = loadLocalFile(R.raw.style);
+            msgpack_min_js = loadLocalFile(R.raw.msgpack_min);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-    String index_html = null;
-    String script_js = null;
-    String style_css = null;
-    String msgpack_min_js = null;
+    private RemoteKeyboardService service;
 
-    private Context mContext;
-
-    public WebServer(Context context, int port) throws IOException {
+    public WebServer(RemoteKeyboardService service, int port) {
         super(port);
-        this.mContext = context;
-
-        index_html = loadLocalFile(R.raw.index);
-        script_js = loadLocalFile(R.raw.script);
-        style_css = loadLocalFile(R.raw.style);
-        msgpack_min_js = loadLocalFile(R.raw.msgpack_min);
+        this.service = service;
     }
 
     @Override
@@ -65,13 +67,14 @@ public class WebServer extends NanoHTTPD {
                 try {
                     jsonObj = new JSONObject(unpacker.unpackValue().toJson());
                     if (jsonObj.get("mode").equals("D")) {
+                        CtrlInputAction cia = new CtrlInputAction(service);
                         cia.keyCode = jsonObj.getInt("code");
                         cia.shiftKey = jsonObj.getBoolean("shift");
                         cia.altKey = jsonObj.getBoolean("alt");
                         cia.ctrlKey = jsonObj.getBoolean("ctrl");
                         ActionRunner actionRunner = new ActionRunner();
                         actionRunner.setAction(cia);
-                        RemoteKeyboardService.self.handler.post(actionRunner);
+                        service.handler.post(actionRunner);
                         actionRunner.waitResult();
                     }
                 } catch (IOException e) {
@@ -82,7 +85,7 @@ public class WebServer extends NanoHTTPD {
             }
             return newFixedLengthResponse(null);
         } else if (uri.equals("/text")) {
-            CharSequence txt = RemoteKeyboardService.self.getCurrentInputConnection().getExtractedText(
+            CharSequence txt = service.getCurrentInputConnection().getExtractedText(
                     new ExtractedTextRequest(), 0).text;
             MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
             try {
@@ -95,6 +98,7 @@ public class WebServer extends NanoHTTPD {
             return newChunkedResponse(Response.Status.OK, "application/x-msgpack", is);
         } else if (uri.equals("/fill")) {
             if (Method.POST.equals(session.getMethod())) {
+                TextInputAction tia = new TextInputAction(service);
                 MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(session.getInputStream());
                 try {
                     tia.text = unpacker.unpackString();
@@ -105,13 +109,14 @@ public class WebServer extends NanoHTTPD {
                 if (tia.text != null) {
                     ActionRunner actionRunner = new ActionRunner();
                     actionRunner.setAction(tia);
-                    RemoteKeyboardService.self.handler.post(actionRunner);
+                    service.handler.post(actionRunner);
                     actionRunner.waitResult();
                 }
             }
             return newFixedLengthResponse(null);
         } else if (uri.equals("/append")) {
             if (Method.POST.equals(session.getMethod())) {
+                TextInputAction tia = new TextInputAction(service);
                 MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(session.getInputStream());
                 try {
                     tia.text = unpacker.unpackString();
@@ -122,7 +127,7 @@ public class WebServer extends NanoHTTPD {
                 if (tia.text != null) {
                     ActionRunner actionRunner = new ActionRunner();
                     actionRunner.setAction(tia);
-                    RemoteKeyboardService.self.handler.post(actionRunner);
+                    service.handler.post(actionRunner);
                     actionRunner.waitResult();
                 }
             }
@@ -133,8 +138,8 @@ public class WebServer extends NanoHTTPD {
         return newFixedLengthResponse(index_html);
     }
 
-    private String loadLocalFile(@RawRes int id) throws IOException {
-        InputStream is = mContext.getResources().openRawResource(id);
+    private static String loadLocalFile(@RawRes int id) throws IOException {
+        InputStream is = Resources.getSystem().openRawResource(id);
         byte[] buffer = new byte[is.available()];
         is.read(buffer);
         is.close();
@@ -177,3 +182,4 @@ public class WebServer extends NanoHTTPD {
         }
     }
 }
+

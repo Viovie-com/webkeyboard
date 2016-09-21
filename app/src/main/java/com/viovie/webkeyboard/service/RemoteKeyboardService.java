@@ -35,10 +35,6 @@ public class RemoteKeyboardService extends InputMethodService implements
      * For referencing our notification in the notification area.
      */
     public static final int NOTIFICATION = 42;
-    /**
-     * Reference to the running service
-     */
-    public static RemoteKeyboardService self;
 
     /**
      * For posting InputActions on the UI thread.
@@ -54,7 +50,6 @@ public class RemoteKeyboardService extends InputMethodService implements
     @Override
     public void onCreate() {
         super.onCreate();
-        self = this;
         handler = new Handler();
 
         try {
@@ -92,7 +87,6 @@ public class RemoteKeyboardService extends InputMethodService implements
         webServer.stop();
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         notificationManager.cancel(NOTIFICATION);
-        self = null;
     }
 
     @Override
