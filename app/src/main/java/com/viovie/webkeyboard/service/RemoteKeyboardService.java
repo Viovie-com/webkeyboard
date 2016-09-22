@@ -4,16 +4,13 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.inputmethodservice.InputMethodService;
 import android.inputmethodservice.Keyboard;
 import android.inputmethodservice.KeyboardView;
 import android.inputmethodservice.KeyboardView.OnKeyboardActionListener;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 
 import com.viovie.webkeyboard.R;
@@ -42,10 +39,6 @@ public class RemoteKeyboardService extends InputMethodService implements
     private WebServer webServer;
 
     @Override
-    public void onStartInputView(EditorInfo info, boolean restarting) {
-    }
-
-    @Override
     public void onCreate() {
         super.onCreate();
         handler = new Handler();
@@ -57,12 +50,6 @@ public class RemoteKeyboardService extends InputMethodService implements
         } catch (IOException e) {
             logger.e("new WebServer exception", e);
         }
-    }
-
-    @Override
-    public boolean onEvaluateFullscreenMode() {
-        SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(this);
-        return p.getBoolean("pref_fullscreen", false);
     }
 
     @Override

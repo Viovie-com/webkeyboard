@@ -5,7 +5,7 @@
     android:horizontalGap="2px"
     android:verticalGap="2px" >
          
-    <Row android:keyWidth="25%" >
+    <Row android:keyWidth="100%" >
     	<Key android:keyIcon="@drawable/ic_action_selectime" android:codes="0" />
     </Row>
 </Keyboard>

@@ -6,6 +6,7 @@ import android.view.inputmethod.ExtractedTextRequest;
 import com.viovie.webkeyboard.service.RemoteKeyboardService;
 import com.viovie.webkeyboard.task.CtrlInputAction;
 import com.viovie.webkeyboard.task.TextInputAction;
+import com.viovie.webkeyboard.util.Logger;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,6 +22,8 @@ import java.util.Map;
 import fi.iki.elonen.NanoHTTPD;
 
 public class WebServer extends NanoHTTPD {
+    private static Logger logger = Logger.getInstance(WebServer.class);
+
     private RemoteKeyboardService service;
 
     public WebServer(RemoteKeyboardService service, int port) {
@@ -44,11 +47,12 @@ public class WebServer extends NanoHTTPD {
         }
 
         if (uri.equals("/key")) {
-            if (Method.POST.equals(session.getMethod())) {
+            if (session.getMethod() == Method.POST) {
                 MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(session.getInputStream());
                 JSONObject jsonObj = null;
                 try {
                     jsonObj = new JSONObject(unpacker.unpackValue().toJson());
+                    logger.e("key:" + jsonObj.toString());
                     if (jsonObj.get("mode").equals("D")) {
                         CtrlInputAction cia = new CtrlInputAction(service);
                         cia.keyCode = jsonObj.getInt("code");
@@ -61,32 +65,32 @@ public class WebServer extends NanoHTTPD {
                         actionRunner.waitResult();
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    logger.e("uri key", e);
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    logger.e("uri key", e);
                 }
             }
             return newFixedLengthResponse(null);
         } else if (uri.equals("/text")) {
-            CharSequence txt = service.getCurrentInputConnection().getExtractedText(
-                    new ExtractedTextRequest(), 0).text;
+            CharSequence txt = service.getCurrentInputConnection()
+                    .getExtractedText(new ExtractedTextRequest(), 0).text;
             MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
             try {
                 packer.packString(txt.toString());
                 packer.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.e("uri text", e);
             }
             InputStream is = new ByteArrayInputStream(packer.toByteArray());
             return newChunkedResponse(Response.Status.OK, "application/x-msgpack", is);
         } else if (uri.equals("/fill")) {
-            if (Method.POST.equals(session.getMethod())) {
+            if (session.getMethod() == Method.POST) {
                 TextInputAction tia = new TextInputAction(service);
                 MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(session.getInputStream());
                 try {
                     tia.text = unpacker.unpackString();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    logger.e("uri fill", e);
                 }
                 tia.replace_text = true;
                 if (tia.text != null) {
@@ -98,13 +102,13 @@ public class WebServer extends NanoHTTPD {
             }
             return newFixedLengthResponse(null);
         } else if (uri.equals("/append")) {
-            if (Method.POST.equals(session.getMethod())) {
+            if (session.getMethod() == Method.POST) {
                 TextInputAction tia = new TextInputAction(service);
                 MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(session.getInputStream());
                 try {
                     tia.text = unpacker.unpackString();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    logger.e("uri append", e);
                 }
                 tia.replace_text = false;
                 if (tia.text != null) {
@@ -130,12 +134,12 @@ public class WebServer extends NanoHTTPD {
             is.read(buffer);
             data = new String(buffer);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.e("loadLocalFile " + id, e);
         } finally {
             try {
                 is.close();
             } catch (IOException ex) {
-                ex.printStackTrace();
+                logger.e("loadLocalFile close " + id, ex);
             }
         }
         return data;
