@@ -12,7 +12,6 @@ import android.inputmethodservice.KeyboardView.OnKeyboardActionListener;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -21,15 +20,14 @@ import com.viovie.webkeyboard.R;
 import com.viovie.webkeyboard.WebServer;
 import com.viovie.webkeyboard.activity.MainActivity;
 import com.viovie.webkeyboard.util.InternetUtil;
+import com.viovie.webkeyboard.util.Logger;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.HashMap;
 
 public class RemoteKeyboardService extends InputMethodService implements
         OnKeyboardActionListener {
-
-    public static final String TAG = "RemoteKeyboardService";
+    private static Logger logger = Logger.getInstance(RemoteKeyboardService.class);
 
     /**
      * For referencing our notification in the notification area.
@@ -57,7 +55,7 @@ public class RemoteKeyboardService extends InputMethodService implements
             webServer.start();
             updateNotification(null);
         } catch (IOException e) {
-            Log.w(TAG, e);
+            logger.e("new WebServer exception", e);
         }
     }
 

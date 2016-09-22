@@ -1,8 +1,6 @@
 package com.viovie.webkeyboard;
 
-import android.content.res.Resources;
 import android.support.annotation.RawRes;
-import android.util.Log;
 import android.view.inputmethod.ExtractedTextRequest;
 
 import com.viovie.webkeyboard.service.RemoteKeyboardService;

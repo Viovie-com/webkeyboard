@@ -3,12 +3,8 @@ package com.viovie.webkeyboard.task;
 import android.os.SystemClock;
 import android.view.KeyEvent;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.ExtractedText;
-import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
-import android.widget.Toast;
 
-import com.viovie.webkeyboard.R;
 import com.viovie.webkeyboard.service.RemoteKeyboardService;
 
 /**
