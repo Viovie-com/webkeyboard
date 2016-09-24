@@ -157,10 +157,9 @@ WebKeyboard.prototype.fillText = function() {
 WebKeyboard.prototype.appendText = function() {
   if (this.area.is_compositing || this.area.getText() == '') return;
 
-  var request = new MsgPackRequest(() => {
-    this.area.clearText();
-  });
+  var request = new MsgPackRequest();
   request.post('/append', this.area.getText());
+  this.area.clearText();
 }
 
 WebKeyboard.prototype.setDisable = function() {
