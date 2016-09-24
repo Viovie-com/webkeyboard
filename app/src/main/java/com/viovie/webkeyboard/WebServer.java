@@ -37,9 +37,14 @@ public class WebServer extends NanoHTTPD {
         Map<String, String> header = session.getHeaders();
         String uri = session.getUri();
 
+        CookieHandler cookies = session.getCookies();
+        for (String cookie : cookies) {
+            logger.e("Cookie:" + cookie);
+        }
+
         // Return file
         if (uri.equals("/script.js")) {
-            return newFixedLengthResponse(loadLocalFile(R.raw.script));
+            return newFixedLengthResponse(loadLocalFile(R.raw.script_min));
         } else if (uri.equals("/msgpack.min.js")) {
             return newFixedLengthResponse(loadLocalFile(R.raw.msgpack_min));
         } else if (uri.equals("/style.css")) {
