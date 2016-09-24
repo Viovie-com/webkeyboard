@@ -9,7 +9,7 @@ var MsgPackRequest = function(onSuccess, onError) {
   };
   this.xhr = new XMLHttpRequest();
   this.xhr.responseType = 'arraybuffer';
-  this.xhr.onreadystatechange = () => {
+  this.xhr.onreadystatechange = (function() {
     if (this.xhr.readyState == 4) {
       if (this.xhr.status == 0) {
         try {
@@ -25,7 +25,7 @@ var MsgPackRequest = function(onSuccess, onError) {
         }
       }
     }
-  };
+  }).bind(this);
 };
 
 MsgPackRequest.prototype.get = function(url) {
@@ -44,12 +44,12 @@ MsgPackRequest.prototype.post = function(url, data) {
 var InputArea = function(area) {
   this.area = area;
   this.is_compositing = false;
-  this.area.addEventListener("compositionstart", () => {
+  this.area.addEventListener("compositionstart", (function() {
     this.is_compositing = true;
-  });
-  this.area.addEventListener("compositionend", () => {
+  }).bind(this));
+  this.area.addEventListener("compositionend", (function() {
     this.is_compositing = false;
-  });
+  }).bind(this));
 };
 
 InputArea.prototype.setColor = function(color) {
@@ -89,12 +89,12 @@ InputArea.prototype.focusInput = function() {
 var WebKeyboard = function(area) {
   this.area = new InputArea(area);
 
-  window.onblur = () => {
+  window.onblur = (function() {
     this.area.focusInput();
-  }
-  window.onfocus = () => {
+  }).bind(this);
+  window.onfocus = (function() {
     this.area.focusInput();
-  }
+  }).bind(this);
   this.area.focusInput();
 
   this.setDirect();
@@ -135,22 +135,22 @@ WebKeyboard.prototype.down = function(e) {
 }
 
 WebKeyboard.prototype.getText = function() {
-  var request = new MsgPackRequest((state, response) => {
+  var request = new MsgPackRequest((function(state, response) {
     this.area.putText(response);
     this.setLocal();
-  }, () => {
+  }).bind(this), (function() {
     this.getText();
-  });
+  }).bind(this));
   request.get("/text");
 }
 
 WebKeyboard.prototype.fillText = function() {
-  var request = new MsgPackRequest(() => {
+  var request = new MsgPackRequest((function() {
     this.area.clearText();
     this.setDirect();
-  }, () => {
+  }).bind(this), (function() {
     this.fillText();
-  });
+  }).bind(this));
   request.post('/fill', this.area.getText());
 }
 
@@ -170,7 +170,7 @@ WebKeyboard.prototype.setDisable = function() {
 
 WebKeyboard.prototype.setLocal = function() {
   this.area.setColor('local');
-  this.area.setKeyUpEvent(() => {
+  this.area.setKeyUpEvent((function() {
     var e = window.event;
     if (e.keyCode == 115) { // F4
       this.fillText();
@@ -178,7 +178,7 @@ WebKeyboard.prototype.setLocal = function() {
       return false;
     }
     return true;
-  });
+  }).bind(this));
   this.area.setKeyDownEvent(null);
 }
 
