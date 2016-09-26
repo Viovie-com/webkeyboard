@@ -41,7 +41,7 @@ public class WebServer extends NanoHTTPD {
 
         // Return file
         if (uri.equals("/script.js")) {
-            return newFixedLengthResponse(loadLocalFile(R.raw.script_min));
+            return newFixedLengthResponse(loadLocalFile(R.raw.script));
         } else if (uri.equals("/msgpack.min.js")) {
             return newFixedLengthResponse(loadLocalFile(R.raw.msgpack_min));
         } else if (uri.equals("/style.css")) {

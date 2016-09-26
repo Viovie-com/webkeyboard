@@ -62,15 +62,15 @@ InputArea.prototype.setColor = function(color) {
 };
 
 InputArea.prototype.getText = function() {
-  return this.area.innerText;
+  return this.area.value;
 };
 
 InputArea.prototype.putText = function(text) {
-  this.area.innerText = text;
+  this.area.value = text;
 };
 
 InputArea.prototype.clearText = function() {
-  this.area.innerText = "";
+  this.area.value = "";
 };
 
 InputArea.prototype.setKeyDownEvent = function(cb) {
@@ -189,5 +189,5 @@ WebKeyboard.prototype.setDirect = function() {
 }
 
 window.onload = function() {
-  new WebKeyboard(document.body);
+  new WebKeyboard(document.getElementById('write'));
 };
