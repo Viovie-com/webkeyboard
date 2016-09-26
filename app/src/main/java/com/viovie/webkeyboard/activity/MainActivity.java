@@ -15,12 +15,13 @@ import android.widget.TextView;
 import com.viovie.webkeyboard.R;
 import com.viovie.webkeyboard.service.RemoteKeyboardService;
 import com.viovie.webkeyboard.util.InternetUtil;
+import com.viovie.webkeyboard.util.Logger;
 
 import java.util.Iterator;
 import java.util.List;
 
 public class MainActivity extends Activity {
-
+    private static Logger logger = Logger.getInstance(MainActivity.class);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

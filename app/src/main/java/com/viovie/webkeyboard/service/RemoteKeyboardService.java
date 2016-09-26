@@ -13,8 +13,10 @@ import android.support.v4.app.NotificationCompat;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
+import com.viovie.webkeyboard.ConnectListPreferences;
 import com.viovie.webkeyboard.R;
 import com.viovie.webkeyboard.WebServer;
+import com.viovie.webkeyboard.activity.ConnectListActivity;
 import com.viovie.webkeyboard.activity.MainActivity;
 import com.viovie.webkeyboard.util.InternetUtil;
 import com.viovie.webkeyboard.util.Logger;
@@ -44,6 +46,7 @@ public class RemoteKeyboardService extends InputMethodService implements
         handler = new Handler();
 
         try {
+            ConnectListPreferences.clear(this);
             webServer = new WebServer(this, 8080);
             webServer.start();
             updateNotification(null);
@@ -81,6 +84,11 @@ public class RemoteKeyboardService extends InputMethodService implements
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.showInputMethodPicker();
                 break;
+            }
+            case 1: {
+                Intent intent = new Intent(this, ConnectListActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
             }
         }
     }

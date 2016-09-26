@@ -37,10 +37,7 @@ public class WebServer extends NanoHTTPD {
         Map<String, String> header = session.getHeaders();
         String uri = session.getUri();
 
-        CookieHandler cookies = session.getCookies();
-        for (String cookie : cookies) {
-            logger.e("Cookie:" + cookie);
-        }
+        ConnectListPreferences.saveIp(service, header.get("http-client-ip"));
 
         // Return file
         if (uri.equals("/script.js")) {
