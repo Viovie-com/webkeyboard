@@ -6,6 +6,7 @@ import android.view.inputmethod.ExtractedTextRequest;
 import com.viovie.webkeyboard.service.RemoteKeyboardService;
 import com.viovie.webkeyboard.task.CtrlInputAction;
 import com.viovie.webkeyboard.task.TextInputAction;
+import com.viovie.webkeyboard.util.ConnectListUtil;
 import com.viovie.webkeyboard.util.Logger;
 
 import org.json.JSONException;
@@ -37,7 +38,11 @@ public class WebServer extends NanoHTTPD {
         Map<String, String> header = session.getHeaders();
         String uri = session.getUri();
 
-        ConnectListPreferences.saveIp(service, header.get("http-client-ip"));
+        String ip = header.get("http-client-ip");
+        ConnectListUtil.saveIp(service, ip);
+        if (ConnectListUtil.isBlock(service, ip)) {
+            return newChunkedResponse(Response.Status.NOT_ACCEPTABLE, "", null);
+        }
 
         // Return file
         if (uri.equals("/script.js")) {

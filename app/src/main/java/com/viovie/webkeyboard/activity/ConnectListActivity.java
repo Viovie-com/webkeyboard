@@ -2,11 +2,13 @@ package com.viovie.webkeyboard.activity;
 
 import android.app.ListActivity;
 import android.os.Bundle;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 
-import com.viovie.webkeyboard.ConnectListPreferences;
+import com.viovie.webkeyboard.util.ConnectListUtil;
 import com.viovie.webkeyboard.util.Logger;
 
 public class ConnectListActivity extends ListActivity {
@@ -32,8 +34,18 @@ public class ConnectListActivity extends ListActivity {
         // We pass null for the cursor, then update it in onLoadFinished()
         mAdapter = new ArrayAdapter(this,
                 android.R.layout.simple_list_item_1,
-                ConnectListPreferences.getIpList(this).toArray()
+                ConnectListUtil.getIpList(this).toArray()
                 );
         setListAdapter(mAdapter);
+    }
+
+    @Override
+    protected void onListItemClick(ListView list, View v, int position, long id) {
+        String ip = (String) list.getAdapter().getItem(position);
+        if (ConnectListUtil.isBlock(this, ip)) {
+            ConnectListUtil.cancelBlockIp(this, ip);
+        } else {
+            ConnectListUtil.blockIp(this, ip);
+        }
     }
 }
