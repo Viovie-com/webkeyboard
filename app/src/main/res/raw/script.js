@@ -112,13 +112,11 @@ WebKeyboard.prototype.send_key = function(mode, code, shift_key, ctrl_key, alt_k
 }
 
 WebKeyboard.prototype.up = function(e) {
-  if (!e) e = window.event;
   this.appendText();
   this.send_key('U', e.keyCode, e.shiftKey, e.ctrlKey, e.altKey);
 }
 
 WebKeyboard.prototype.down = function(e) {
-  if (!e) e = window.event;
   if (e.ctrlKey || e.altKey ||
     e.keyCode == 13 || // Enter
     e.keyCode == 9 || // Tab
@@ -170,8 +168,7 @@ WebKeyboard.prototype.setDisable = function() {
 
 WebKeyboard.prototype.setLocal = function() {
   this.area.setColor('local');
-  this.area.setKeyUpEvent((function() {
-    var e = window.event;
+  this.area.setKeyUpEvent((function(e) {
     if (e.keyCode == 115) { // F4
       this.fillText();
       this.setDisable();
@@ -188,6 +185,87 @@ WebKeyboard.prototype.setDirect = function() {
   this.area.setKeyUpEvent(this.up.bind(this));
 }
 
+
+var VirtualKeyboard = function(keyboard, input_area) {
+  this.shift = false;
+  this.capslock = false;
+  this.input_area = input_area;
+  var keys = keyboard.getElementsByTagName('li');
+  for (var i = 0; i < keys.length; i++) {
+    keys[i].addEventListener('click', this.click.bind(this), false);
+  }
+}
+
+VirtualKeyboard.prototype.toggleCase = function() {
+  var letters = document.getElementsByClassName('letter');
+  for (var i = 0; i < letters.length; i++) {
+    letters[i].classList.toggle('uppercase');
+  }
+}
+
+VirtualKeyboard.prototype.toggleSymbol = function() {
+  var symbols = document.getElementsByClassName('symbol');
+  for (var i = 0; i < symbols.length; i++) {
+    var tags = symbols[i].getElementsByTagName('span');
+    for (var j = 0; j < tags.length; j++) {
+      if (tags[j].classList.contains('invisible'))
+        tags[j].classList.remove('invisible');
+      else
+        tags[j].classList.add('invisible');
+    }
+  }
+}
+
+VirtualKeyboard.prototype.click = function(e) {
+  var char = e.target.innerText;
+
+  // Shift keys
+  if (e.target.classList.contains('left-shift') || e.target.classList.contains('right-shift')) {
+    this.toggleCase();
+    this.toggleSymbol();
+    this.shift = (this.shift === true) ? false : true;
+    this.capslock = false;
+    return false;
+  }
+
+  // Caps lock
+  if (e.target.classList.contains('capslock')) {
+    this.toggleCase();
+    this.capslock = true;
+    return false;
+  }
+
+  // Delete
+  if (e.target.classList.contains('delete')) {
+    var text = this.input_area.value;
+    this.input_area.value = text.substr(0, text.length - 1);
+    return false;
+  }
+
+  // Special characters
+  if (e.target.classList.contains('space')) char = ' ';
+  if (e.target.classList.contains('tab')) char = "\t";
+  if (e.target.classList.contains('return')) char = "\n";
+
+  // Uppercase letter
+  if (e.target.classList.contains('uppercase')) char = char.toUpperCase();
+
+  // Remove shift once a key is clicked.
+  if (this.shift === true) {
+    this.toggleSymbol();
+    if (this.capslock === false)
+      this.toggleCase();
+    this.shift = false;
+  }
+
+  // Add the character
+  this.input_area.value += char;
+}
+
+
 window.onload = function() {
   new WebKeyboard(document.getElementById('write'));
+  new VirtualKeyboard(
+    document.getElementById('keyboard'),
+    document.getElementById('write'));
 };
