@@ -1,12 +1,8 @@
 'use strict'
 
 var MsgPackRequest = function(onSuccess, onError) {
-  this.onSuccess = onSuccess || function(xhr, data) {
-    console.log(xhr.status);
-  };
-  this.onError = onError || function(xhr, data) {
-    console.log(xhr.status);
-  };
+  this.onSuccess = onSuccess || function(xhr, data) {};
+  this.onError = onError || function(xhr, data) {};
   this.xhr = new XMLHttpRequest();
   this.xhr.responseType = 'arraybuffer';
   this.xhr.onreadystatechange = (function() {
@@ -52,29 +48,28 @@ var InputArea = function(area) {
   }).bind(this));
 };
 
-InputArea.prototype.setColor = function(color) {
-  if (color == 'disable')
-    this.area.style.backgroundColor = "#f1e1cd";
-  if (color == 'local')
-    this.area.style.backgroundColor = "#FFFFFF";
-  if (color == 'direct')
-    this.area.style.backgroundColor = "#f1f1ed";
-};
-
 InputArea.prototype.getText = function() {
   return this.area.value;
 };
 
-InputArea.prototype.putText = function(text) {
+InputArea.prototype.replaceText = function(text) {
   this.area.value = text;
 };
 
+InputArea.prototype.appendText = function(text) {
+  this.area.value += text;
+};
+
 InputArea.prototype.clearText = function() {
-  this.area.value = "";
+  this.area.value = '';
 };
 
 InputArea.prototype.setKeyDownEvent = function(cb) {
   this.area.onkeydown = cb;
+};
+
+InputArea.prototype.setInputEvent = function(cb) {
+  this.area.oninput = cb;
 };
 
 InputArea.prototype.setKeyUpEvent = function(cb) {
@@ -86,8 +81,10 @@ InputArea.prototype.focusInput = function() {
 };
 
 
-var WebKeyboard = function(area) {
-  this.area = new InputArea(area);
+var WebKeyboard = function() {
+  this.area = new InputArea(document.getElementById('write'));
+  this.vkb = new VirtualKeyboard(
+    document.getElementById('keyboard'), this.area, this);
 
   window.onblur = (function() {
     this.area.focusInput();
@@ -124,17 +121,12 @@ WebKeyboard.prototype.down = function(e) {
   ) {
     e.preventDefault();
   }
-  if (e.keyCode == 115) {
-    this.setDisable();
-    this.getText();
-    return false;
-  }
   this.send_key('D', e.keyCode, e.shiftKey, e.ctrlKey, e.altKey);
 }
 
 WebKeyboard.prototype.getText = function() {
   var request = new MsgPackRequest((function(state, response) {
-    this.area.putText(response);
+    this.area.replaceText(response);
     this.setLocal();
   }).bind(this), (function() {
     this.getText();
@@ -161,38 +153,35 @@ WebKeyboard.prototype.appendText = function() {
 }
 
 WebKeyboard.prototype.setDisable = function() {
-  this.area.setColor('disable');
+  this.vkb.setMode('disable');
   this.area.setKeyDownEvent(null);
   this.area.setKeyUpEvent(null);
 }
 
 WebKeyboard.prototype.setLocal = function() {
-  this.area.setColor('local');
-  this.area.setKeyUpEvent((function(e) {
-    if (e.keyCode == 115) { // F4
-      this.fillText();
-      this.setDisable();
-      return false;
-    }
-    return true;
-  }).bind(this));
+  this.vkb.setMode('local');
   this.area.setKeyDownEvent(null);
+  this.area.setKeyUpEvent(null);
 }
 
 WebKeyboard.prototype.setDirect = function() {
-  this.area.setColor('direct');
+  this.vkb.setMode('direct');
   this.area.setKeyDownEvent(this.down.bind(this));
   this.area.setKeyUpEvent(this.up.bind(this));
 }
 
 
-var VirtualKeyboard = function(keyboard, input_area) {
+var VirtualKeyboard = function(keyboard, input_area, web_kb) {
   this.shift = false;
   this.capslock = false;
   this.input_area = input_area;
+  this.web_kb = web_kb;
+
   var keys = keyboard.getElementsByTagName('li');
   for (var i = 0; i < keys.length; i++) {
     keys[i].addEventListener('click', this.click.bind(this), false);
+    if (keys[i].classList.contains('mode'))
+      this.mode_key = keys[i];
   }
 }
 
@@ -216,6 +205,15 @@ VirtualKeyboard.prototype.toggleSymbol = function() {
   }
 }
 
+VirtualKeyboard.prototype.setMode = function(mode) {
+  if (mode == 'disable')
+    this.mode_key.innerText = 'DISABLE';
+  if (mode == 'local')
+    this.mode_key.innerText = 'LOCAL';
+  if (mode == 'direct')
+    this.mode_key.innerText = 'DIRECT';
+};
+
 VirtualKeyboard.prototype.click = function(e) {
   var char = e.target.innerText;
 
@@ -237,8 +235,8 @@ VirtualKeyboard.prototype.click = function(e) {
 
   // Delete
   if (e.target.classList.contains('delete')) {
-    var text = this.input_area.value;
-    this.input_area.value = text.substr(0, text.length - 1);
+    var text = this.input_area.getText();
+    this.input_area.replaceText(text.substr(0, text.length - 1));
     return false;
   }
 
@@ -258,14 +256,24 @@ VirtualKeyboard.prototype.click = function(e) {
     this.shift = false;
   }
 
+  if (e.target.classList.contains('mode')) {
+    if (e.target.innerText == 'DIRECT') {
+      this.web_kb.setDisable();
+      this.web_kb.getText();
+    } else {
+      this.web_kb.setDisable();
+      this.web_kb.fillText();
+    }
+    return false;
+  }
+
   // Add the character
-  this.input_area.value += char;
+  this.input_area.appendText(char);
+  if (this.mode_key.innerText == 'DIRECT')
+    this.web_kb.appendText();
 }
 
 
 window.onload = function() {
-  new WebKeyboard(document.getElementById('write'));
-  new VirtualKeyboard(
-    document.getElementById('keyboard'),
-    document.getElementById('write'));
+  new WebKeyboard();
 };
