@@ -11,6 +11,9 @@
     <string name="dialog_error_not_enabled_title">網路鍵盤尚未啟用</string>
     <string name="dialog_error_not_enabled">是否要現在開啟鍵盤設定，啟用網路鍵盤？</string>
 
+    <string name="dialog_connect_title">連線權限</string>
+    <string name="dialog_connect_message">是否允許 %1$s 連線？</string>
+
     <string name="notification_title">網路鍵盤</string>
     <string name="notification_waiting">Listening on %1$s Port 8080</string>
     <string name="notification_peer">Connected to: %1$s</string>

@@ -11,6 +11,9 @@
     <string name="dialog_error_not_enabled_title">Input method is not enable</string>
     <string name="dialog_error_not_enabled">Open system settings to enable it now?</string>
 
+    <string name="dialog_connect_title">Require your permission</string>
+    <string name="dialog_connect_message">Connect by %1$s ?</string>
+
     <string name="notification_title">Web Keyboard</string>
     <string name="notification_waiting">Listening on %1$s Port 8080</string>
     <string name="notification_peer">Connected to: %1$s</string>

@@ -1,12 +1,15 @@
 package com.viovie.webkeyboard;
 
+import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.RawRes;
 import android.view.inputmethod.ExtractedTextRequest;
 
+import com.viovie.webkeyboard.activity.AlertActivity;
 import com.viovie.webkeyboard.service.RemoteKeyboardService;
 import com.viovie.webkeyboard.task.CtrlInputAction;
 import com.viovie.webkeyboard.task.TextInputAction;
-import com.viovie.webkeyboard.util.ConnectListUtil;
+import com.viovie.webkeyboard.util.ConnectUtil;
 import com.viovie.webkeyboard.util.Logger;
 
 import org.json.JSONException;
@@ -38,10 +41,22 @@ public class WebServer extends NanoHTTPD {
         Map<String, String> header = session.getHeaders();
         String uri = session.getUri();
 
-        String ip = header.get("http-client-ip");
-        ConnectListUtil.saveIp(service, ip);
-        if (ConnectListUtil.isBlock(service, ip)) {
-            return newChunkedResponse(Response.Status.NOT_ACCEPTABLE, "", null);
+        final String ip = header.get("http-client-ip");
+        if (!ConnectUtil.getInstance(service).isConnect(ip)) {
+            service.handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    Intent intent = new Intent(service, AlertActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    Bundle bundle = new Bundle();
+                    bundle.putString(AlertActivity.INTENT_PARAM_IP, ip);
+                    intent.putExtras(bundle);
+                    service.startActivity(intent);
+                }
+            });
+
+            // Reload page
+            return newFixedLengthResponse(loadLocalFile(R.raw.reload));
         }
 
         // Return file
