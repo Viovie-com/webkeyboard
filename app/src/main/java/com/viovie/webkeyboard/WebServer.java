@@ -47,7 +47,7 @@ public class WebServer extends NanoHTTPD {
                 @Override
                 public void run() {
                     Intent intent = new Intent(service, AlertActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     Bundle bundle = new Bundle();
                     bundle.putString(AlertActivity.INTENT_PARAM_IP, ip);
                     intent.putExtras(bundle);
