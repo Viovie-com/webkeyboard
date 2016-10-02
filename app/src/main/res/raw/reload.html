@@ -3,6 +3,24 @@
 
 <head>
     <title>Web Keyboard</title>
+    <script>
+window.onload = function() {
+  var checkWorker;
+  if(typeof(Worker) !== "undefined") {
+    if(typeof(checkWorker) == "undefined") {
+       checkWorker = new Worker("script.js");
+    }
+    checkWorker.onmessage = function(event) {
+      console.log("on message:" + event.data);
+      if (event.data) {
+        checkWorker.terminate();
+        checkWorker = undefined;
+        document.location = "/index.html";
+      }
+    };
+  }
+}
+    </script>
 </head>
 
 <body>

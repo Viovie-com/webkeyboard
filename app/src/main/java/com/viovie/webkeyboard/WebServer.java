@@ -41,7 +41,26 @@ public class WebServer extends NanoHTTPD {
         Map<String, String> header = session.getHeaders();
         String uri = session.getUri();
 
+        // Return file
+        if (uri.equals("/script.js")) {
+            return newFixedLengthResponse(loadLocalFile(R.raw.script));
+        } else if (uri.equals("/msgpack.min.js")) {
+            return newFixedLengthResponse(loadLocalFile(R.raw.msgpack_min));
+        } else if (uri.equals("/style.css")) {
+            return newFixedLengthResponse(Response.Status.OK, "text/css", loadLocalFile(R.raw.style));
+        }
+
         final String ip = header.get("http-client-ip");
+
+        // Check verify
+        if (uri.equals("/check")) {
+            return newFixedLengthResponse(
+                    ConnectUtil.getInstance(service).isConnect(ip) ?
+                    Response.Status.OK : Response.Status.NOT_ACCEPTABLE,
+                    "text/json", null);
+        }
+
+        // Verify connect
         if (!ConnectUtil.getInstance(service).isConnect(ip)) {
             service.handler.post(new Runnable() {
                 @Override
@@ -57,15 +76,6 @@ public class WebServer extends NanoHTTPD {
 
             // Reload page
             return newFixedLengthResponse(loadLocalFile(R.raw.reload));
-        }
-
-        // Return file
-        if (uri.equals("/script.js")) {
-            return newFixedLengthResponse(loadLocalFile(R.raw.script));
-        } else if (uri.equals("/msgpack.min.js")) {
-            return newFixedLengthResponse(loadLocalFile(R.raw.msgpack_min));
-        } else if (uri.equals("/style.css")) {
-            return newFixedLengthResponse(Response.Status.OK, "text/css", loadLocalFile(R.raw.style));
         }
 
         if (uri.equals("/key")) {

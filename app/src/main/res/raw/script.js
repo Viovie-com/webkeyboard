@@ -7,17 +7,17 @@ var MsgPackRequest = function(onSuccess, onError) {
   this.xhr.responseType = 'arraybuffer';
   this.xhr.onreadystatechange = (function() {
     if (this.xhr.readyState == 4) {
-      if (this.xhr.status == 0) {
-        try {
-          this.onError(this.xhr, msgpack.decode(new Uint8Array(this.xhr.response)));
-        } catch (e) {
-          this.onError(this.xhr, null);
-        }
-      } else if (200 <= this.xhr.status && this.xhr.status < 400) {
+      if (200 <= this.xhr.status && this.xhr.status < 400) {
         try {
           this.onSuccess(this.xhr, msgpack.decode(new Uint8Array(this.xhr.response)));
         } catch (e) {
           this.onSuccess(this.xhr, null);
+        }
+      } else {
+        try {
+          this.onError(this.xhr, msgpack.decode(new Uint8Array(this.xhr.response)));
+        } catch (e) {
+          this.onError(this.xhr, null);
         }
       }
     }
@@ -35,7 +35,6 @@ MsgPackRequest.prototype.post = function(url, data) {
   this.xhr.setRequestHeader('Content-Type', 'application/x-msgpack');
   this.xhr.send(packData);
 };
-
 
 var InputArea = function(area) {
   this.area = area;
@@ -273,7 +272,14 @@ VirtualKeyboard.prototype.click = function(e) {
     this.web_kb.appendText();
 }
 
-
-window.onload = function() {
-  new WebKeyboard();
-};
+importScripts('/msgpack.min.js');
+function checkWorker() {
+  var request = new MsgPackRequest((function() {
+    postMessage(true);
+  }).bind(this), (function() {
+    postMessage(false);
+    setTimeout("checkWorker()", 1000);
+  }).bind(this));
+  request.post('/check', null);
+}
+checkWorker();
