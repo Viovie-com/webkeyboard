@@ -17,13 +17,19 @@ import org.json.JSONObject;
 import org.msgpack.core.MessageBufferPacker;
 import org.msgpack.core.MessagePack;
 import org.msgpack.core.MessageUnpacker;
+import org.nanohttpd.protocols.http.IHTTPSession;
+import org.nanohttpd.protocols.http.NanoHTTPD;
+import org.nanohttpd.protocols.http.request.Method;
+import org.nanohttpd.protocols.http.response.Response;
+import org.nanohttpd.protocols.http.response.Status;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
-import fi.iki.elonen.NanoHTTPD;
+import static org.nanohttpd.protocols.http.response.Response.newChunkedResponse;
+import static org.nanohttpd.protocols.http.response.Response.newFixedLengthResponse;
 
 public class WebServer extends NanoHTTPD {
     private static Logger logger = Logger.getInstance(WebServer.class);
@@ -47,17 +53,17 @@ public class WebServer extends NanoHTTPD {
         } else if (uri.equals("/msgpack.min.js")) {
             return newFixedLengthResponse(loadLocalFile(R.raw.msgpack_min));
         } else if (uri.equals("/style.css")) {
-            return newFixedLengthResponse(Response.Status.OK, "text/css", loadLocalFile(R.raw.style));
+            return newFixedLengthResponse(Status.OK, "text/css", loadLocalFile(R.raw.style));
         }
 
         final String ip = header.get("http-client-ip");
 
         // Check verify
-        if (uri.equals("/check")) {
+        if (uri.equals("/check") && session.getMethod() == Method.POST) {
             return newFixedLengthResponse(
                     ConnectUtil.getInstance(service).isConnect(ip) ?
-                    Response.Status.OK : Response.Status.NOT_ACCEPTABLE,
-                    "text/json", null);
+                    Status.OK : Status.NOT_ACCEPTABLE,
+                    "text/json", "");
         }
 
         // Verify connect
@@ -114,7 +120,7 @@ public class WebServer extends NanoHTTPD {
                 logger.e("uri text", e);
             }
             InputStream is = new ByteArrayInputStream(packer.toByteArray());
-            return newChunkedResponse(Response.Status.OK, "application/x-msgpack", is);
+            return newChunkedResponse(Status.OK, "application/x-msgpack", is);
         } else if (uri.equals("/fill")) {
             if (session.getMethod() == Method.POST) {
                 TextInputAction tia = new TextInputAction(service);

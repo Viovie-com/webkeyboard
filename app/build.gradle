@@ -20,9 +20,8 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:support-v4:24.2.1'
-    compile 'org.nanohttpd:nanohttpd:2.2.0'
     compile 'org.msgpack:msgpack-core:0.8.9'
+    compile project(':nanohttpd')
 }

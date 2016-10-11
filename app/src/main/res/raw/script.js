@@ -26,13 +26,14 @@ var MsgPackRequest = function(onSuccess, onError) {
 
 MsgPackRequest.prototype.get = function(url) {
   this.xhr.open('GET', url, true);
+  this.xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
   this.xhr.send();
 };
 
 MsgPackRequest.prototype.post = function(url, data) {
   var packData = msgpack.encode(data);
   this.xhr.open('POST', url, true);
-  this.xhr.setRequestHeader('Content-Type', 'application/x-msgpack');
+  this.xhr.setRequestHeader('Content-Type', 'application/x-msgpack; charset=UTF-8');
   this.xhr.send(packData);
 };
 
@@ -271,15 +272,3 @@ VirtualKeyboard.prototype.click = function(e) {
   if (this.mode_key.innerText == 'DIRECT')
     this.web_kb.appendText();
 }
-
-importScripts('/msgpack.min.js');
-function checkWorker() {
-  var request = new MsgPackRequest((function() {
-    postMessage(true);
-  }).bind(this), (function() {
-    postMessage(false);
-    setTimeout("checkWorker()", 1000);
-  }).bind(this));
-  request.post('/check', null);
-}
-checkWorker();
