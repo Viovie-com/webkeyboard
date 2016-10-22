@@ -11,6 +11,7 @@ import android.inputmethodservice.KeyboardView.OnKeyboardActionListener;
 import android.os.Handler;
 import android.support.v4.app.NotificationCompat;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.inputmethod.InputMethodManager;
 
 import com.viovie.webkeyboard.util.ConnectListUtil;
@@ -57,6 +58,8 @@ public class RemoteKeyboardService extends InputMethodService implements
 
     @Override
     public View onCreateInputView() {
+        if (!ViewConfiguration.get(getApplicationContext()).hasPermanentMenuKey())
+            return new KeyboardView(this, null);
         KeyboardView ret = new KeyboardView(this, null);
         ret.setKeyboard(new Keyboard(this, R.xml.keyboarddef));
         ret.setOnKeyboardActionListener(this);
