@@ -43,7 +43,6 @@ public class WebServer extends NanoHTTPD {
 
     @Override
     public Response serve(IHTTPSession session) {
-        Map<String, String> parms = session.getParms();
         Map<String, String> header = session.getHeaders();
         String uri = session.getUri();
 

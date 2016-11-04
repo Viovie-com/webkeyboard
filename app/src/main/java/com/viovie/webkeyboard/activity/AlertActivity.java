@@ -33,6 +33,8 @@ public class AlertActivity extends Activity implements View.OnClickListener{
 
         Button noButton = (Button) findViewById(R.id.no);
         noButton.setOnClickListener(this);
+
+        setFinishOnTouchOutside(false);
     }
 
     @Override

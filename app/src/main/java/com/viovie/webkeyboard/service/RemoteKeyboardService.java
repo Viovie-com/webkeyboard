@@ -46,7 +46,6 @@ public class RemoteKeyboardService extends InputMethodService implements
         handler = new Handler();
 
         try {
-            ConnectUtil.getInstance(this).disconnect();
             webServer = new WebServer(this, 8080);
             webServer.start();
             updateNotification(null);
