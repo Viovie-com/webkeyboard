@@ -1,4 +1,11 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android" >
-    <item android:id="@+id/keyboard_select" android:title="@string/menu_keyboard_select" android:showAsAction="ifRoom"/>
-    <item android:id="@+id/keyboard_setting" android:title="@string/menu_keyboard_setting" android:showAsAction="ifRoom"/>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/keyboard_select"
+        android:title="@string/menu_keyboard_select"
+        app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/keyboard_setting"
+        android:title="@string/menu_keyboard_setting"
+        app:showAsAction="ifRoom"/>
 </menu>

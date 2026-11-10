@@ -10,7 +10,7 @@ import com.viovie.webkeyboard.R;
 import com.viovie.webkeyboard.util.ConnectUtil;
 import com.viovie.webkeyboard.util.Logger;
 
-public class AlertActivity extends Activity implements View.OnClickListener{
+public class AlertActivity extends Activity implements View.OnClickListener {
     private static Logger logger = Logger.getInstance(AlertActivity.class);
     public static final String INTENT_PARAM_IP = "intentIp";
 
@@ -37,13 +37,12 @@ public class AlertActivity extends Activity implements View.OnClickListener{
 
     @Override
     public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.yes: {
-                ConnectUtil.getInstance(this).connect(ip);
-            }
-            case R.id.no: {
-                finish();
-            }
+        int id = view.getId();
+        if (id == R.id.yes) {
+            ConnectUtil.getInstance(this).connect(ip);
+            finish();
+        } else if (id == R.id.no) {
+            finish();
         }
     }
 }

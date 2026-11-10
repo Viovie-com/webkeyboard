@@ -1,3 +1,0 @@
-[submodule "nanohttpd"]
-	path = nanohttpd
-	url = https://github.com/Viovie-com/nanohttpd.git

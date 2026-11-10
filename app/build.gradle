@@ -1,27 +1,46 @@
-apply plugin: 'com.android.application'
+plugins {
+    id 'com.android.application'
+}
 
 android {
-    compileSdkVersion 24
-    buildToolsVersion "23.0.3"
+    namespace "com.viovie.webkeyboard"
+    compileSdk 35
 
     defaultConfig {
         applicationId "com.viovie.webkeyboard"
-        minSdkVersion 19
-        targetSdkVersion 24
+        minSdk 21
+        targetSdk 35
         versionCode 1
         versionName "1.0.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
+
+    buildFeatures {
+        buildConfig true
+    }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
 }
 
 dependencies {
-    testCompile 'junit:junit:4.12'
-    compile 'com.android.support:support-v4:24.2.1'
-    compile 'org.msgpack:msgpack-core:0.8.9'
-    compile project(':nanohttpd')
+    implementation 'androidx.annotation:annotation:1.9.1'
+    implementation 'androidx.core:core:1.15.0'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'org.msgpack:msgpack-core:0.8.24'
+
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation 'androidx.test:runner:1.6.2'
+    androidTestImplementation 'androidx.test:rules:1.6.1'
 }

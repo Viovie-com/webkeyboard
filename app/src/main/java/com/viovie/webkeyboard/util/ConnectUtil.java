@@ -13,7 +13,7 @@ public class ConnectUtil {
     private Context mContext;
 
     private ConnectUtil(Context context) {
-        mContext = context;
+        mContext = context.getApplicationContext();
         sharedPreferences = mContext.getSharedPreferences(CONNECT_UTIL, Context.MODE_PRIVATE);
     }
 

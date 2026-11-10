@@ -1,6 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.viovie.webkeyboard">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission
         android:name="android.permission.BIND_INPUT_METHOD"
@@ -8,7 +7,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:allowBackup="true"
@@ -18,7 +18,8 @@
         android:theme="@style/AppTheme">
         <service
             android:name=".service.RemoteKeyboardService"
-            android:permission="android.permission.BIND_INPUT_METHOD" >
+            android:permission="android.permission.BIND_INPUT_METHOD"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.view.InputMethod" />
             </intent-filter>
@@ -30,7 +31,8 @@
 
         <activity
             android:name=".activity.MainActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -49,16 +51,18 @@
             android:excludeFromRecents="true"
             android:label="@string/app_name"
             android:noHistory="true"
-            android:theme="@android:style/Theme.NoDisplay" >
-            <action android:name="android.intent.action.MAIN" />
-        </activity>
+            android:theme="@android:style/Theme.NoDisplay"
+            android:exported="false" />
 
         <activity
             android:name=".activity.AlertActivity"
             android:label="@string/app_name"
-            android:theme="@android:style/Theme.Dialog" />
+            android:theme="@android:style/Theme.Dialog"
+            android:exported="false" />
 
-        <receiver android:name=".WidgetProvider" >
+        <receiver
+            android:name=".WidgetProvider"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
