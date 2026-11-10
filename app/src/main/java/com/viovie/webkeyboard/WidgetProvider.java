@@ -6,6 +6,7 @@ import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.widget.RemoteViews;
 
 import com.viovie.webkeyboard.activity.WidgetActivity;
@@ -20,10 +21,14 @@ public class WidgetProvider extends AppWidgetProvider {
                          int[] appWidgetIds) {
         super.onUpdate(context, appWidgetManager, appWidgetIds);
 
-        RemoteViews view = new RemoteViews(getClass().getPackage().getName(),
+        RemoteViews view = new RemoteViews(context.getPackageName(),
                 R.layout.widget);
         Intent intent = new Intent(context, WidgetActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
+        int pendingIntentFlags = 0;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            pendingIntentFlags |= PendingIntent.FLAG_IMMUTABLE;
+        }
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, pendingIntentFlags);
 
         view.setOnClickPendingIntent(R.id.widgeticon, pendingIntent);
         ComponentName componentName = new ComponentName(context.getPackageName(),

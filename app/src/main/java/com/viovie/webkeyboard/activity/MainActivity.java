@@ -58,24 +58,24 @@ public class MainActivity extends Activity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.activity_main, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.keyboard_select: {
-                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        int id = item.getItemId();
+        if (id == R.id.keyboard_select) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null) {
                 imm.showInputMethodPicker();
-                break;
             }
-            case R.id.keyboard_setting: {
-                showKeyboardSetting();
-            }
+            return true;
+        } else if (id == R.id.keyboard_setting) {
+            showKeyboardSetting();
+            return true;
         }
-        return false;
+        return super.onOptionsItemSelected(item);
     }
 
     private DialogInterface.OnClickListener dialogOnClick = new DialogInterface.OnClickListener() {
@@ -92,13 +92,15 @@ public class MainActivity extends Activity {
         startActivity(new Intent(android.provider.Settings.ACTION_INPUT_METHOD_SETTINGS));
     }
 
-    /**
-     *
-     * @return
-     */
     private boolean isWebKeyboardEnabled() {
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm == null) {
+            return false;
+        }
         List<InputMethodInfo> enabledList = imm.getEnabledInputMethodList();
+        if (enabledList == null) {
+            return false;
+        }
         Iterator<InputMethodInfo> it = enabledList.iterator();
 
         boolean available = false;

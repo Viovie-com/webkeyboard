@@ -1,5 +1,6 @@
 package com.viovie.webkeyboard.service;
 
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -8,8 +9,9 @@ import android.inputmethodservice.InputMethodService;
 import android.inputmethodservice.Keyboard;
 import android.inputmethodservice.KeyboardView;
 import android.inputmethodservice.KeyboardView.OnKeyboardActionListener;
+import android.os.Build;
 import android.os.Handler;
-import android.support.v4.app.NotificationCompat;
+import androidx.core.app.NotificationCompat;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.inputmethod.InputMethodManager;
@@ -32,6 +34,7 @@ public class RemoteKeyboardService extends InputMethodService implements
      * For referencing our notification in the notification area.
      */
     public static final int NOTIFICATION = 42;
+    public static final String CHANNEL_ID = "remote_keyboard_service_channel";
 
     /**
      * For posting InputActions on the UI thread.
@@ -74,9 +77,13 @@ public class RemoteKeyboardService extends InputMethodService implements
     @Override
     public void onDestroy() {
         super.onDestroy();
-        webServer.stop();
+        if (webServer != null) {
+            webServer.stop();
+        }
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        notificationManager.cancel(NOTIFICATION);
+        if (notificationManager != null) {
+            notificationManager.cancel(NOTIFICATION);
+        }
     }
 
     @Override
@@ -84,7 +91,9 @@ public class RemoteKeyboardService extends InputMethodService implements
         switch (primaryCode) {
             case 0: {
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.showInputMethodPicker();
+                if (imm != null) {
+                    imm.showInputMethodPicker();
+                }
                 break;
             }
         }
@@ -133,16 +142,31 @@ public class RemoteKeyboardService extends InputMethodService implements
             content = getString(R.string.notification_peer, remote.getHostName());
         }
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        if (notificationManager != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                    CHANNEL_ID,
+                    title,
+                    NotificationManager.IMPORTANCE_LOW);
+            notificationManager.createNotificationChannel(channel);
+        }
+
+        int pendingIntentFlags = PendingIntent.FLAG_UPDATE_CURRENT;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            pendingIntentFlags |= PendingIntent.FLAG_IMMUTABLE;
+        }
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID);
         builder
                 .setContentText(content)
                 .setContentTitle(title)
                 .setOngoing(true)
                 .setContentIntent(
                         PendingIntent.getActivity(this, 0, new Intent(this,
-                                MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT))
+                                MainActivity.class), pendingIntentFlags))
                 .setSmallIcon(R.drawable.ic_stat_service);
-        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        notificationManager.notify(NOTIFICATION, builder.build());
+        if (notificationManager != null) {
+            notificationManager.notify(NOTIFICATION, builder.build());
+        }
     }
 }
