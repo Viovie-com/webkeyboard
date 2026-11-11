@@ -60,6 +60,11 @@
             android:theme="@android:style/Theme.Dialog"
             android:exported="false" />
 
+        <activity
+            android:name=".activity.SettingsActivity"
+            android:label="@string/menu_options"
+            android:exported="true" />
+
         <receiver
             android:name=".WidgetProvider"
             android:exported="true">

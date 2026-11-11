@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Web Keyboard</string>
-    <string name="app_quickinstuctions">Set Web Keyboard as your input method, then touch any textfield to activate it. Connect to http://%1$s:8080 with a morden web browser  and type!</string>
+    <string name="app_quickinstuctions">Set Web Keyboard as your input method, then touch any textfield to activate it. Connect to %1$s with a modern web browser and type!</string>
 
     <string name="menu_keyboard_select">Select Keyboard</string>
     <string name="menu_keyboard_setting">Keyboard Setting</string>
+    <string name="menu_options">Options</string>
 
     <string name="text_test_hint">Test your connection here!</string>
 
@@ -15,6 +16,15 @@
     <string name="dialog_connect_message">Connect by %1$s ?</string>
 
     <string name="notification_title">Web Keyboard</string>
-    <string name="notification_waiting">Listening on %1$s Port 8080</string>
+    <string name="notification_waiting">Listening on %1$s</string>
     <string name="notification_peer">Connected to: %1$s</string>
+
+    <string name="pref_header_server">Server Options</string>
+    <string name="pref_title_port">Server Port</string>
+    <string name="pref_title_https">Enable HTTPS</string>
+    <string name="pref_summary_https">Use SSL/TLS encrypted connection</string>
+    <string name="pref_title_password">Password Protection</string>
+    <string name="pref_password_set">Password is set</string>
+    <string name="pref_password_not_set">No password set</string>
+    <string name="pref_invalid_port">Port must be a number between 1024 and 65535</string>
 </resources>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="@string/pref_header_server">
+        <EditTextPreference
+            android:key="pref_port"
+            android:title="@string/pref_title_port"
+            android:dialogTitle="@string/pref_title_port"
+            android:defaultValue="8080"
+            android:inputType="number" />
+        <CheckBoxPreference
+            android:key="pref_https"
+            android:title="@string/pref_title_https"
+            android:summary="@string/pref_summary_https"
+            android:defaultValue="false" />
+        <EditTextPreference
+            android:key="pref_password"
+            android:title="@string/pref_title_password"
+            android:dialogTitle="@string/pref_title_password"
+            android:inputType="textPassword" />
+    </PreferenceCategory>
+</PreferenceScreen>

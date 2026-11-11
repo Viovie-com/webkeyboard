@@ -23,7 +23,6 @@ import org.msgpack.core.MessageUnpacker;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,35 +31,55 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyStore;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLServerSocketFactory;
+
 public class WebServer {
     private static Logger logger = Logger.getInstance(WebServer.class);
 
+    private static final String KEYSTORE_PASSWORD = "webkeyboard";
+
     private final RemoteKeyboardService service;
     private final int port;
+    private final boolean isHttps;
+    private final String password;
+
     private ServerSocket serverSocket;
     private ExecutorService executor;
     private volatile boolean isRunning;
 
     public WebServer(RemoteKeyboardService service, int port) {
+        this(service, port, false, null);
+    }
+
+    public WebServer(RemoteKeyboardService service, int port, boolean isHttps, String password) {
         this.service = service;
         this.port = port;
+        this.isHttps = isHttps;
+        this.password = (password != null && !password.trim().isEmpty()) ? password : null;
     }
 
     public synchronized void start() throws IOException {
         if (isRunning) {
             return;
         }
-        serverSocket = new ServerSocket(port);
+        if (isHttps) {
+            serverSocket = createSSLServerSocket(port);
+        } else {
+            serverSocket = new ServerSocket(port);
+        }
         executor = Executors.newCachedThreadPool();
         isRunning = true;
         executor.submit(this::listenLoop);
-        logger.i("WebServer started on port " + port);
+        logger.i("WebServer started on port " + port + (isHttps ? " (HTTPS)" : " (HTTP)"));
     }
 
     public synchronized void stop() {
@@ -78,6 +97,35 @@ public class WebServer {
             executor = null;
         }
         logger.i("WebServer stopped");
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public boolean isHttps() {
+        return isHttps;
+    }
+
+    private ServerSocket createSSLServerSocket(int port) throws IOException {
+        try {
+            KeyStore keyStore = KeyStore.getInstance("PKCS12");
+            try (InputStream is = service.getResources().openRawResource(R.raw.keystore)) {
+                keyStore.load(is, KEYSTORE_PASSWORD.toCharArray());
+            }
+
+            KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+            kmf.init(keyStore, KEYSTORE_PASSWORD.toCharArray());
+
+            SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(kmf.getKeyManagers(), null, null);
+
+            SSLServerSocketFactory ssf = sslContext.getServerSocketFactory();
+            return ssf.createServerSocket(port);
+        } catch (Exception e) {
+            logger.e("Failed to create SSLServerSocket", e);
+            throw new IOException("Failed to create SSLServerSocket: " + e.getMessage(), e);
+        }
     }
 
     private void listenLoop() {
@@ -104,14 +152,99 @@ public class WebServer {
             // Read HTTP request line and headers
             HttpRequest request = parseRequest(rawIn, socket.getInetAddress());
             if (request == null) {
-                sendResponse(rawOut, 400, "Bad Request", "text/plain; charset=utf-8", "Bad Request".getBytes(StandardCharsets.UTF_8));
+                sendResponse(rawOut, 400, "Bad Request", "text/plain; charset=utf-8", "Bad Request".getBytes(StandardCharsets.UTF_8), null);
                 return;
+            }
+
+            // Check password authentication if configured
+            if (password != null) {
+                String authHeader = request.headers.get("authorization");
+                if (!isAuthorized(authHeader, password)) {
+                    Map<String, String> extraHeaders = new HashMap<>();
+                    extraHeaders.put("WWW-Authenticate", "Basic realm=\"Web Keyboard\"");
+                    sendResponse(rawOut, 401, "Unauthorized", "text/plain; charset=utf-8",
+                            "Authentication required.\n".getBytes(StandardCharsets.UTF_8), extraHeaders);
+                    return;
+                }
             }
 
             processRequest(request, rawOut);
         } catch (Exception e) {
             logger.e("Error processing client request", e);
         }
+    }
+
+    public static boolean isAuthorized(String authHeader, String expectedPassword) {
+        if (expectedPassword == null || expectedPassword.isEmpty()) {
+            return true;
+        }
+        if (authHeader == null || !authHeader.toLowerCase(Locale.US).startsWith("basic ")) {
+            return false;
+        }
+        String b64 = authHeader.substring(6).trim();
+        try {
+            byte[] decodedBytes = decodeBase64(b64);
+            if (decodedBytes == null) {
+                return false;
+            }
+            String decoded = new String(decodedBytes, StandardCharsets.UTF_8);
+            int colonIndex = decoded.indexOf(':');
+            String user;
+            String pass;
+            if (colonIndex != -1) {
+                user = decoded.substring(0, colonIndex);
+                pass = decoded.substring(colonIndex + 1);
+            } else {
+                user = "";
+                pass = decoded;
+            }
+            return expectedPassword.equals(pass) || expectedPassword.equals(user);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private static byte[] decodeBase64(String input) {
+        if (input == null) {
+            return null;
+        }
+        int len = input.length();
+        // Base64 lookup table
+        int[] table = new int[128];
+        for (int i = 0; i < 128; i++) {
+            table[i] = -1;
+        }
+        for (int i = 'A'; i <= 'Z'; i++) {
+            table[i] = i - 'A';
+        }
+        for (int i = 'a'; i <= 'z'; i++) {
+            table[i] = i - 'a' + 26;
+        }
+        for (int i = '0'; i <= '9'; i++) {
+            table[i] = i - '0' + 52;
+        }
+        table['+'] = 62;
+        table['/'] = 63;
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        int bits = 0;
+        int bitCount = 0;
+        for (int i = 0; i < len; i++) {
+            char c = input.charAt(i);
+            if (c == '=') {
+                break;
+            }
+            if (c >= 128 || table[c] < 0) {
+                continue; // ignore whitespace or illegal chars
+            }
+            bits = (bits << 6) | table[c];
+            bitCount += 6;
+            if (bitCount >= 8) {
+                bitCount -= 8;
+                out.write((bits >> bitCount) & 0xFF);
+            }
+        }
+        return out.toByteArray();
     }
 
     private HttpRequest parseRequest(InputStream in, InetAddress clientAddress) throws IOException {
@@ -199,13 +332,13 @@ public class WebServer {
 
         // Static resources
         if ("/script.js".equals(uri)) {
-            sendResponse(out, 200, "OK", "application/javascript; charset=utf-8", loadLocalFile(R.raw.script));
+            sendResponse(out, 200, "OK", "application/javascript; charset=utf-8", loadLocalFile(R.raw.script), null);
             return;
         } else if ("/msgpack.min.js".equals(uri)) {
-            sendResponse(out, 200, "OK", "application/javascript; charset=utf-8", loadLocalFile(R.raw.msgpack_min));
+            sendResponse(out, 200, "OK", "application/javascript; charset=utf-8", loadLocalFile(R.raw.msgpack_min), null);
             return;
         } else if ("/style.css".equals(uri)) {
-            sendResponse(out, 200, "OK", "text/css; charset=utf-8", loadLocalFile(R.raw.style));
+            sendResponse(out, 200, "OK", "text/css; charset=utf-8", loadLocalFile(R.raw.style), null);
             return;
         }
 
@@ -214,7 +347,7 @@ public class WebServer {
             boolean isConnected = ConnectUtil.getInstance(service).isConnect(ip);
             int statusCode = isConnected ? 200 : 406;
             String statusText = isConnected ? "OK" : "Not Acceptable";
-            sendResponse(out, statusCode, statusText, "application/json", new byte[0]);
+            sendResponse(out, statusCode, statusText, "application/json", new byte[0], null);
             return;
         }
 
@@ -230,7 +363,7 @@ public class WebServer {
             });
 
             // Return reload page
-            sendResponse(out, 200, "OK", "text/html; charset=utf-8", loadLocalFile(R.raw.reload));
+            sendResponse(out, 200, "OK", "text/html; charset=utf-8", loadLocalFile(R.raw.reload), null);
             return;
         }
 
@@ -255,7 +388,7 @@ public class WebServer {
                     logger.e("uri key", e);
                 }
             }
-            sendResponse(out, 200, "OK", "application/octet-stream", new byte[0]);
+            sendResponse(out, 200, "OK", "application/octet-stream", new byte[0], null);
             return;
         } else if ("/text".equals(uri)) {
             CharSequence txt = "";
@@ -274,7 +407,7 @@ public class WebServer {
                 logger.e("uri text", e);
             }
             byte[] packed = packer.toByteArray();
-            sendResponse(out, 200, "OK", "application/x-msgpack", packed);
+            sendResponse(out, 200, "OK", "application/x-msgpack", packed, null);
             return;
         } else if ("/fill".equals(uri)) {
             if ("POST".equals(method)) {
@@ -293,7 +426,7 @@ public class WebServer {
                     actionRunner.waitResult();
                 }
             }
-            sendResponse(out, 200, "OK", "application/octet-stream", new byte[0]);
+            sendResponse(out, 200, "OK", "application/octet-stream", new byte[0], null);
             return;
         } else if ("/append".equals(uri)) {
             if ("POST".equals(method)) {
@@ -312,19 +445,25 @@ public class WebServer {
                     actionRunner.waitResult();
                 }
             }
-            sendResponse(out, 200, "OK", "application/octet-stream", new byte[0]);
+            sendResponse(out, 200, "OK", "application/octet-stream", new byte[0], null);
             return;
         }
 
         // Default: return index.html
-        sendResponse(out, 200, "OK", "text/html; charset=utf-8", loadLocalFile(R.raw.index));
+        sendResponse(out, 200, "OK", "text/html; charset=utf-8", loadLocalFile(R.raw.index), null);
     }
 
-    private void sendResponse(OutputStream out, int statusCode, String statusText, String contentType, byte[] data) throws IOException {
+    private void sendResponse(OutputStream out, int statusCode, String statusText,
+                              String contentType, byte[] data, Map<String, String> extraHeaders) throws IOException {
         StringBuilder headers = new StringBuilder();
         headers.append("HTTP/1.1 ").append(statusCode).append(" ").append(statusText).append("\r\n");
         if (contentType != null) {
             headers.append("Content-Type: ").append(contentType).append("\r\n");
+        }
+        if (extraHeaders != null) {
+            for (Map.Entry<String, String> entry : extraHeaders.entrySet()) {
+                headers.append(entry.getKey()).append(": ").append(entry.getValue()).append("\r\n");
+            }
         }
         headers.append("Content-Length: ").append(data != null ? data.length : 0).append("\r\n");
         headers.append("Connection: close\r\n");
