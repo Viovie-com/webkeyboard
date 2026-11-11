@@ -5,7 +5,9 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.inputmethod.InputMethodInfo;
@@ -33,10 +35,19 @@ public class MainActivity extends Activity {
     protected void onResume() {
         super.onResume();
 
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean isHttps = prefs.getBoolean(SettingsActivity.PREF_HTTPS, false);
+        int port = SettingsActivity.DEFAULT_PORT;
+        try {
+            port = Integer.parseInt(prefs.getString(SettingsActivity.PREF_PORT, String.valueOf(SettingsActivity.DEFAULT_PORT)));
+        } catch (NumberFormatException ignored) {
+        }
         String ipAddress = InternetUtil.getWifiIpAddress(this);
+        String scheme = isHttps ? "https://" : "http://";
+        String hostUrl = scheme + ipAddress + ":" + port;
 
         TextView instructionText = (TextView) findViewById(R.id.quickinstructions);
-        instructionText.setText(getString(R.string.app_quickinstuctions, ipAddress));
+        instructionText.setText(getString(R.string.app_quickinstuctions, hostUrl));
 
         boolean isEnabled = isWebKeyboardEnabled();
         if (!isEnabled) {
@@ -73,6 +84,9 @@ public class MainActivity extends Activity {
             return true;
         } else if (id == R.id.keyboard_setting) {
             showKeyboardSetting();
+            return true;
+        } else if (id == R.id.options) {
+            startActivity(new Intent(this, SettingsActivity.class));
             return true;
         }
         return super.onOptionsItemSelected(item);

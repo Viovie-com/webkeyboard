@@ -5,17 +5,20 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.inputmethodservice.InputMethodService;
 import android.inputmethodservice.Keyboard;
 import android.inputmethodservice.KeyboardView;
 import android.inputmethodservice.KeyboardView.OnKeyboardActionListener;
 import android.os.Build;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import androidx.core.app.NotificationCompat;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.inputmethod.InputMethodManager;
 
+import com.viovie.webkeyboard.activity.SettingsActivity;
 import com.viovie.webkeyboard.util.ConnectUtil;
 import com.viovie.webkeyboard.R;
 import com.viovie.webkeyboard.WebServer;
@@ -27,7 +30,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 
 public class RemoteKeyboardService extends InputMethodService implements
-        OnKeyboardActionListener {
+        OnKeyboardActionListener, SharedPreferences.OnSharedPreferenceChangeListener {
     private static Logger logger = Logger.getInstance(RemoteKeyboardService.class);
 
     /**
@@ -42,19 +45,50 @@ public class RemoteKeyboardService extends InputMethodService implements
     public Handler handler;
 
     private WebServer webServer;
+    private SharedPreferences preferences;
 
     @Override
     public void onCreate() {
         super.onCreate();
         handler = new Handler();
+        preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        preferences.registerOnSharedPreferenceChangeListener(this);
+
+        startWebServer();
+    }
+
+    private synchronized void startWebServer() {
+        if (webServer != null) {
+            webServer.stop();
+            webServer = null;
+        }
 
         try {
             ConnectUtil.getInstance(this).disconnect();
-            webServer = new WebServer(this, 8080);
+
+            int port = SettingsActivity.DEFAULT_PORT;
+            try {
+                port = Integer.parseInt(preferences.getString(SettingsActivity.PREF_PORT, String.valueOf(SettingsActivity.DEFAULT_PORT)));
+            } catch (NumberFormatException ignored) {
+            }
+            boolean isHttps = preferences.getBoolean(SettingsActivity.PREF_HTTPS, false);
+            String password = preferences.getString(SettingsActivity.PREF_PASSWORD, "");
+
+            webServer = new WebServer(this, port, isHttps, password);
             webServer.start();
             updateNotification(null);
         } catch (IOException e) {
-            logger.e("new WebServer exception", e);
+            logger.e("WebServer startup exception", e);
+        }
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (SettingsActivity.PREF_PORT.equals(key) ||
+                SettingsActivity.PREF_HTTPS.equals(key) ||
+                SettingsActivity.PREF_PASSWORD.equals(key)) {
+            logger.i("Preference changed for " + key + ", restarting WebServer");
+            startWebServer();
         }
     }
 
@@ -77,6 +111,9 @@ public class RemoteKeyboardService extends InputMethodService implements
     @Override
     public void onDestroy() {
         super.onDestroy();
+        if (preferences != null) {
+            preferences.unregisterOnSharedPreferenceChangeListener(this);
+        }
         if (webServer != null) {
             webServer.stop();
         }
@@ -136,8 +173,12 @@ public class RemoteKeyboardService extends InputMethodService implements
         String title = getString(R.string.notification_title);
         String content = null;
         if (remote == null) {
+            boolean isHttps = (webServer != null && webServer.isHttps());
+            int port = (webServer != null) ? webServer.getPort() : SettingsActivity.DEFAULT_PORT;
             String ipAddress = InternetUtil.getWifiIpAddress(this);
-            content = getString(R.string.notification_waiting, "" + ipAddress);
+            String scheme = isHttps ? "https://" : "http://";
+            String hostUrl = scheme + ipAddress + ":" + port;
+            content = getString(R.string.notification_waiting, hostUrl);
         } else {
             content = getString(R.string.notification_peer, remote.getHostName());
         }

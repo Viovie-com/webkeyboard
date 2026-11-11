@@ -8,4 +8,8 @@
         android:id="@+id/keyboard_setting"
         android:title="@string/menu_keyboard_setting"
         app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/options"
+        android:title="@string/menu_options"
+        app:showAsAction="ifRoom"/>
 </menu>
